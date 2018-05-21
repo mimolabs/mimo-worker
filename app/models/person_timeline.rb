@@ -1,0 +1,3 @@
+class PersonTimeline < ApplicationRecord
+
+end
