@@ -13,5 +13,6 @@ module MimoWorker
         
     config.autoload_paths += %W(#{config.root}/app/workers)
     config.autoload_paths << "#{Rails.root}/lib"
+    config.active_job.queue_adapter = :sidekiq
   end
 end
