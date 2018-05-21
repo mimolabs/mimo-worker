@@ -87,11 +87,6 @@ module MailChimp
     end
 
     return mc_error(response, opts[:splash_id])
-
-  # rescue => e
-  #   puts e
-  #   Rails.logger.info e
-  #   false
   end
   
   def disabled_mc(opts)
