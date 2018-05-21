@@ -2,6 +2,11 @@ require 'rails_helper'
 
 RSpec.describe Email, type: :model do
   describe 'sending OTP' do
+
+    before(:each) do 
+      REDIS.flushall
+    end
+
     it "should subscribe the email to mailchimp" do
       email = Email.new
       splash = SplashPage.new newsletter_api_token: 123
@@ -52,7 +57,8 @@ RSpec.describe Email, type: :model do
 
       ### failure - mc
       email.lists = []
-     
+    
+      body = {detail: 'eggs'}.to_json
       stub_request(:post, "https://us7.api.mailchimp.com/3.0/lists/my-list/members").
        with(
          body: "{\"email_address\":null,\"status\":null}",
@@ -63,12 +69,29 @@ RSpec.describe Email, type: :model do
         'Content-Type'=>'application/json',
         'User-Agent'=>'Faraday v0.15.1'
          }).
-       to_return(status: 401, body: "", headers: {})
+       to_return(status: 401, body: body, headers: {})
 
+       ### 401 = unauthed
+       expect(email.mc_subscribe(opts)).to eq false
+       key = email.mc_key(123)
+       val = REDIS.get key
+       expect(val).to eq 'eggs'
     end
 
-    fit "should not subscribe to MC - already in list" do
+    fit "should not send - list disabled cos of an error" do
+      splash = SplashPage.new id: 123
 
+      opts = {}
+      opts[:list] = 'my-list'
+      opts[:token] = 'xxx-us7'
+      opts[:splash_id] = splash.id
+
+      my_email = Faker::Internet.email
+      email = Email.new email: my_email
+
+      key = email.mc_key(123)
+      REDIS.set key, 1
+      expect(email.mc_subscribe(opts)).to eq false
     end
 
     it 'it should format the token for MC' do

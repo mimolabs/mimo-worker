@@ -14,7 +14,6 @@ module MailChimp
     pt.location_id = location_id
     pt.event       = "#{service}_subscribe"
     pt.person_id   = person_id
-    # pt.login_email = email
     pt.meta        = { 
       list: list,
       email: email
@@ -27,16 +26,21 @@ module MailChimp
     false
   end
 
+  def mc_key(id)
+    "splashMcDisabled:#{id}"
+  end
+
   def mc_error(response,id)
     if response.status == 400
       puts response.body
       return
     end
 
-    # body = JSON.parse(response.body)
-    # REDIS.setex mc_key(id), 86400, body['detail']
-    # puts "Disabling splash newsletter since we have an error jim"
-    # send_mc_error(mc_error_code_body(response))
+    body = JSON.parse(response.body)
+    REDIS.setex mc_key(id), 86400, body['detail']
+    puts "Disabling splash newsletter since we have an error jim"
+    send_mc_error(mc_error_code_body(response))
+    false
   end
 
   def mc_subscribe(opts)
@@ -46,7 +50,7 @@ module MailChimp
     return mc_in_list if (lists && (lists.include? list))
 
     ### Checks if the splash is disabled
-    # return if disabled_mc(opts)
+    return false if disabled_mc(opts)
 
     token = opts[:token].gsub(' ','')
     url, key = mc_url_token(token)
@@ -89,5 +93,29 @@ module MailChimp
   #   Rails.logger.info e
   #   false
   end
+  
+  def disabled_mc(opts)
+    val = REDIS.get mc_key(opts[:splash_id])
+    return false unless val.present?
 
+    puts "Splash page #{opts[:splash_id]} disabled because of an issue with MC"
+    return true
+  end
+  
+  def send_mc_error(body)
+    puts 'Should send error email!!!!!!'
+  end
+
+  def mc_error_code_body(body)
+    # return 'Hey,<br><br>There was an error with your MailChimp settings. Please check your splash settings.' unless body.present?
+
+    # body =
+    #   "Hey,<br><br>There's been an error with your MailChimp settings for a splash page in #{location.try(:location_name) || 'unknown location'}:<br><br>"+
+    #   "#{body['detail']}.<br><br>"+
+    #   "Please read the following guide for more information:<br><br>"+
+    #   "#{body['type']}<br><br>"+
+    #   "Update your splash page accordingly. No emails will be added until you resolve this error.<br><br>Thanks!"
+
+    # return body
+  end
 end
