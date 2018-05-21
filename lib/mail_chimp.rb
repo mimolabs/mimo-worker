@@ -56,7 +56,7 @@ module MailChimp
     url, key = mc_url_token(token)
 
     ### Disable the splash if the URL is invalid and send email
-    # return invalid_mc_url(opts) unless url.present?
+    return invalid_mc_url(opts) unless url.present?
 
     path = "/lists/#{list}/members"
 
@@ -102,8 +102,25 @@ module MailChimp
     return true
   end
   
+  def invalid_mc_url(opts)
+    puts 'Will send email to user if invalid'
+    send_mc_error(mc_invalid_api_token)
+
+    ### Dont let this happen again! (for a month)
+    REDIS.setex mc_key(opts[:splash_id]), 86400, 'Invalid API token'
+    false
+  end
+
   def send_mc_error(body)
     puts 'Should send error email!!!!!!'
+  end
+
+  def mc_invalid_api_token
+    # body =
+    #   "Hey,<br><br>There's been an error with your MailChimp settings for a splash page in #{location.try(:location_name) || 'unknown location'}. Your API token is invalid. Please read the MailChimp docs to find a valid API token.<br><br>"+
+    #   "Update your splash page accordingly. No emails will be added until you resolve this error.<br><br>Thanks!"
+
+    # return body
   end
 
   def mc_error_code_body(body)

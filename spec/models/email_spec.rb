@@ -94,6 +94,24 @@ RSpec.describe Email, type: :model do
       expect(email.mc_subscribe(opts)).to eq false
     end
 
+    fit "should not send - invalid URL" do
+      splash = SplashPage.new id: 123
+
+      opts = {}
+      opts[:list] = 'my-list'
+      opts[:token] = 'us7'
+      opts[:splash_id] = splash.id
+
+      my_email = Faker::Internet.email
+      email = Email.new email: my_email
+
+      expect(email.mc_subscribe(opts)).to eq false
+
+      key = email.mc_key(123)
+      val = REDIS.get key
+      expect(val).to eq 'Invalid API token'
+    end
+
     it 'it should format the token for MC' do
       e = Email.new
       token = 'xxx-us7'
