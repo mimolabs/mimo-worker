@@ -3,7 +3,7 @@ class RecordLogin
   include Sidekiq::Worker
 
   def perform(opts)
-    puts opts
+    PeopleRelation.record(opts)
   end
 end
 

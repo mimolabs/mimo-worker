@@ -7,7 +7,9 @@ module Twilio
     opts['from'] = splash.twilio_from
 
     body = I18n.t(:"splash.otp_code", :default => "Your one-time password is:")
-    body = body + " " + opts['code']
+    puts body
+
+    body = (body + " #{opts['code']}")
 
     url = "https://api.twilio.com/2010-04-01/Accounts/#{ENV['TWILLIO_USER']}/Messages.json"
     body = {
@@ -26,7 +28,8 @@ module Twilio
 
     # log_otp(response,opts)
     return true
-  rescue
-    puts response.inspect
+  # rescue
+  #   puts response.inspect
+  #   return false
   end
 end

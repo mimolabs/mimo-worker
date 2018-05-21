@@ -13,11 +13,11 @@ RSpec.describe Twilio, type: :model do
 
       stub_request(:post, "https://api.twilio.com/2010-04-01/Accounts//Messages.json").
         with(
-          body: {"Body"=>"Your one-time password is: . This is valid for 5 mins.", "From"=>"+44mynumberhere", "To"=>nil},
+          body: {"Body"=>"Your one-time password is: ", "From"=>"+44mynumberhere", "To"=>nil},
           headers: {
             'Accept'=>'*/*',
             'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
-            'Authorization'=>'Basic Og==',
+            'Authorization'=>'Basic c2ltb246bW9ybGV5',
             'Content-Type'=>'application/x-www-form-urlencoded',
             'User-Agent'=>'Faraday v0.15.1'
           }).
