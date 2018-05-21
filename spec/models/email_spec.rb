@@ -59,8 +59,9 @@ RSpec.describe Email, type: :model do
       expect(email.add_to_list(splash.id)).to eq true
     end
 
-    it "should subscribe the email to sg" do
-      email = Email.new
+    fit "should subscribe the email to sg" do
+      my_email = Faker::Internet.email
+      email = Email.new email: my_email
       splash = SplashPage.new newsletter_api_token: 123
 
       expect(email.add_to_list(splash.id)).to eq false
@@ -71,6 +72,33 @@ RSpec.describe Email, type: :model do
         newsletter_list_id: 'my-list',
         newsletter_type: 4,
       )
+
+      rid = SecureRandom.hex
+      body = { persisted_recipients: [ rid ] }.to_json
+
+      stub_request(:post, "https://api.sendgrid.com/v3/contactdb/recipients").
+        with(
+          body: "[{\"email\":\"#{my_email}\"}]",
+          headers: {
+            'Accept'=>'*/*',
+            'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+            'Authorization'=>'Bearer xxx-us7',
+            'Content-Type'=>'application/json',
+            'User-Agent'=>'Faraday v0.15.1'
+          }).
+          to_return(status: 201, body: body, headers: {})
+
+          stub_request(:post, "https://api.sendgrid.com/v3/contactdb/lists/my-list/recipients/#{rid}").
+            with(
+              headers: {
+                'Accept'=>'*/*',
+                'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+                'Authorization'=>'Bearer xxx-us7',
+                'Content-Length'=>'0',
+                'Content-Type'=>'application/json',
+                'User-Agent'=>'Faraday v0.15.1'
+              }).
+              to_return(status: 201, body: "", headers: {})
 
       expect(email.add_to_list(splash.id)).to eq true
     end

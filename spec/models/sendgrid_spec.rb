@@ -7,7 +7,7 @@ RSpec.describe Email, type: :model do
       REDIS.flushall
     end
 
-    fit "should run subscribe the email to campaign monitor" do
+    it "should run subscribe the email to campaign monitor" do
       splash = SplashPage.new id: 123
 
       opts = {}
@@ -57,7 +57,7 @@ RSpec.describe Email, type: :model do
     end
 
     ### Fails due to call issue to create recipient
-    fit "should fail to subscribe the email to campaign monitor" do
+    it "should fail to subscribe the email to campaign monitor" do
       splash = SplashPage.new id: 123
 
       opts = {}
@@ -90,7 +90,7 @@ RSpec.describe Email, type: :model do
       expect(val).to eq 'Invalid API token'
     end
 
-    fit "should not send - list disabled cos of an error" do
+    it "should not send - list disabled cos of an error" do
       splash = SplashPage.new id: 123
 
       opts = {}

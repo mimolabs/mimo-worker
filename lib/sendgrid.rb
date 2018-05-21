@@ -18,10 +18,13 @@ module Sendgrid
   end
 
   def sg_subscribe(opts)
+
     return email_in_list if (lists.present? && (lists.include? opts[:list]))
 
     ### SendGrid disabled, don't continue
     return false if disabled_sg(opts)
+
+    puts 88888888888888888888888
 
     ### Check the recipient can be added
     recipient_id = add_sg_recipient(opts)

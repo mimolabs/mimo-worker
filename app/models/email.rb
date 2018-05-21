@@ -22,6 +22,8 @@ class Email < ApplicationRecord
       mc_subscribe(opts)
     when 3, '3' # campaign monitor
       cm_subscribe(opts)
+    when 4, '4' # sendgrid
+      sg_subscribe(opts)
     end
   end
 
@@ -37,5 +39,4 @@ class Email < ApplicationRecord
     puts "Email already in that list"
     false
   end
-
 end
