@@ -19,7 +19,7 @@ module Twilio
       faraday.request  :url_encoded             # form-encode POST params
       faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
     end
-    conn.basic_auth(ENV['TWILLIO_USER'], ENV['TWILLIO_PASS'])
+    conn.basic_auth(splash.twilio_user, splash.twilio_pass)
     response = conn.post do |req|
       req.body = body
     end
