@@ -21,11 +21,6 @@ module MailChimp
     pt.save
   end
   
-  def mc_in_list
-    puts "Email already in that list"
-    false
-  end
-
   def mc_key(id)
     "splashMcDisabled:#{id}"
   end
@@ -47,7 +42,7 @@ module MailChimp
     list = opts[:list].gsub(' ','')
 
     ### Checks if the email has already been subscribed - don't send email
-    return mc_in_list if (lists && (lists.include? list))
+    return email_in_list if (lists && (lists.include? list))
 
     ### Checks if the splash is disabled
     return false if disabled_mc(opts)
@@ -65,7 +60,7 @@ module MailChimp
       request: { timeout: 10, open_timeout: 10 }
     )
 
-    body = { email_address: opts[:email], status: opts[:status] }
+    body = { email_address: opts[:email], status: 'pending' }
 
     response = conn.post do |req|
       req.body                      = body.to_json

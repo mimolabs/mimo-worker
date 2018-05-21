@@ -1,5 +1,6 @@
 class Email < ApplicationRecord
   include MailChimp
+  include CampaignMonitor
 
   def add_to_list(splash_id)
     splash = SplashPage.find_by(id: splash_id)
@@ -18,6 +19,8 @@ class Email < ApplicationRecord
     case opts[:type]
     when 2, '2' # mailchimp
       mc_subscribe(opts)
+    when 3, '3' # campaign monitor
+      cm_subscribe(opts)
     end
   end
 
@@ -27,4 +30,11 @@ class Email < ApplicationRecord
       splash.newsletter_list_id && \
       splash.newsletter_type > 1
   end
+
+  ### Helpers
+  def email_in_list
+    puts "Email already in that list"
+    false
+  end
+
 end
