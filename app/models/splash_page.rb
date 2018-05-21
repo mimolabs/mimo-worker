@@ -1,0 +1,3 @@
+class SplashPage < ApplicationRecord
+
+end
