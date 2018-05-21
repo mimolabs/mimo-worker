@@ -24,8 +24,6 @@ module Sendgrid
     ### SendGrid disabled, don't continue
     return false if disabled_sg(opts)
 
-    puts 88888888888888888888888
-
     ### Check the recipient can be added
     recipient_id = add_sg_recipient(opts)
     return false unless recipient_id
