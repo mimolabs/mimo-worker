@@ -41,47 +41,20 @@ RSpec.describe Email, type: :model do
       ### failure - mc
     end
 
-    # fit "should not send - list disabled cos of an error" do
-    #   splash = SplashPage.new id: 123
+    fit "should not send - list disabled cos of an error" do
+      splash = SplashPage.new id: 123
 
-    #   opts = {}
-    #   opts[:list] = 'my-list'
-    #   opts[:token] = 'xxx-us7'
-    #   opts[:splash_id] = splash.id
+      opts = {}
+      opts[:list] = 'my-list'
+      opts[:token] = 'xxx-us7'
+      opts[:splash_id] = splash.id
 
-    #   my_email = Faker::Internet.email
-    #   email = Email.new email: my_email
+      my_email = Faker::Internet.email
+      email = Email.new email: my_email
 
-    #   key = email.mc_key(123)
-    #   REDIS.set key, 1
-    #   expect(email.mc_subscribe(opts)).to eq false
-    # end
-
-    # fit "should not send - invalid URL" do
-    #   splash = SplashPage.new id: 123
-
-    #   opts = {}
-    #   opts[:list] = 'my-list'
-    #   opts[:token] = 'us7'
-    #   opts[:splash_id] = splash.id
-
-    #   my_email = Faker::Internet.email
-    #   email = Email.new email: my_email
-
-    #   expect(email.mc_subscribe(opts)).to eq false
-
-    #   key = email.mc_key(123)
-    #   val = REDIS.get key
-    #   expect(val).to eq 'Invalid API token'
-    # end
-
-    # it 'it should format the token for MC' do
-    #   e = Email.new
-    #   token = 'xxx-us7'
-
-    #   a = e.mc_url_token(token)
-    #   expect(a[0]).to eq 'https://us7.api.mailchimp.com/3.0'
-    #   expect(a[1]).to eq 'xxx'
-    # end
+      key = email.cm_key(123)
+      REDIS.set key, 1
+      expect(email.cm_subscribe(opts)).to eq false
+    end
   end
 end

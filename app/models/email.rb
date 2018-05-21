@@ -1,6 +1,7 @@
 class Email < ApplicationRecord
   include MailChimp
   include CampaignMonitor
+  include Sendgrid
 
   def add_to_list(splash_id)
     splash = SplashPage.find_by(id: splash_id)

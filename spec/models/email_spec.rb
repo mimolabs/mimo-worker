@@ -35,7 +35,7 @@ RSpec.describe Email, type: :model do
       expect(email.add_to_list(splash.id)).to eq true
     end
 
-    it "should subscribe the email to cm" do
+    fit "should subscribe the email to cm" do
       email = Email.new
       splash = SplashPage.new newsletter_api_token: 123
 
@@ -46,6 +46,30 @@ RSpec.describe Email, type: :model do
         newsletter_api_token: 'xxx-us7',
         newsletter_list_id: 'my-list',
         newsletter_type: 3,
+      )
+      stub_request(:post, "https://api.createsend.com/api/v3.1/subscribers/my-list.json").
+        with(
+          body: "{\"EmailAddress\":null,\"Name\":\"\",\"CustomFields\":[],\"Resubscribe\":true,\"RestartSubscriptionBasedAutoresponders\":false}",
+          headers: {
+            'Authorization'=>'Basic eHh4LXVzNzp4',
+            'Content-Type'=>'application/json; charset=utf-8',
+            'User-Agent'=>'createsend-ruby-4.1.2-2.5.1-p57-x86_64-darwin17'
+          }).
+          to_return(status: 200, body: "", headers: {})
+      expect(email.add_to_list(splash.id)).to eq true
+    end
+
+    it "should subscribe the email to sg" do
+      email = Email.new
+      splash = SplashPage.new newsletter_api_token: 123
+
+      expect(email.add_to_list(splash.id)).to eq false
+
+      splash.update(
+        newsletter_active: true,
+        newsletter_api_token: 'xxx-us7',
+        newsletter_list_id: 'my-list',
+        newsletter_type: 4,
       )
 
       expect(email.add_to_list(splash.id)).to eq true
