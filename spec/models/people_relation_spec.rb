@@ -102,6 +102,46 @@ RSpec.describe PeopleRelation, type: :model do
       pt = PersonTimeline.where(event: 'agreement_terms').first
       expect(pt).to eq nil
     end
+
+    fit 'should mark as consented - external email' do
+      t = (Time.now - 10.days).to_i
+      s = SplashPage.create location_id: 100
+      email = 'simon.morley@egg.com'
+    
+      opts = {}
+      opts['client_mac'] = mac
+      opts['location_id'] = 100
+      opts['splash_id'] = s.id
+      opts['timestamp'] = t
+      opts['email'] = email
+      opts['location_id'] = 1000
+      opts['ap_mac'] = ap_mac
+      opts['external_capture'] = true
+
+      expect(PeopleRelation.record(opts)).to eq true
+      person = Person.last
+      expect(person.consented).to eq true
+    end
+
+    fit 'should mark as consented - doi disabled' do
+      t = (Time.now - 10.days).to_i
+      s = SplashPage.create location_id: 100
+      email = 'simon.morley@egg.com'
+    
+      opts = {}
+      opts['client_mac'] = mac
+      opts['location_id'] = 100
+      opts['splash_id'] = s.id
+      opts['timestamp'] = t
+      opts['email'] = email
+      opts['location_id'] = 1000
+      opts['ap_mac'] = ap_mac
+      opts['double_opt_in'] = false
+
+      expect(PeopleRelation.record(opts)).to eq true
+      person = Person.last
+      expect(person.consented).to eq true
+    end
   end
 
 

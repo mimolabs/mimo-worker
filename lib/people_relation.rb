@@ -34,6 +34,10 @@ module PeopleRelation
     if opts[:email].present? && person.email.blank?
       person.email = opts[:email].downcase
       person.consented = false
+
+      if opts[:external_capture] || opts[:double_opt_in] == false
+        person.consented = true
+      end
     end
    
     if person.new_record?
