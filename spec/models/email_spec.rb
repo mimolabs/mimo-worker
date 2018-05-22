@@ -7,7 +7,7 @@ RSpec.describe Email, type: :model do
       REDIS.flushall
     end
 
-    fit "should subscribe the email to mailchimp" do
+    it "should subscribe the email to mailchimp" do
       email = Email.new
       splash = SplashPage.new newsletter_api_token: 123
 
@@ -35,7 +35,7 @@ RSpec.describe Email, type: :model do
       expect(email.add_to_list(splash.id)).to eq true
     end
 
-    fit "should subscribe the email to cm" do
+    it "should subscribe the email to cm" do
       email = Email.new
       splash = SplashPage.new newsletter_api_token: 123
 
@@ -53,13 +53,13 @@ RSpec.describe Email, type: :model do
           headers: {
             'Authorization'=>'Basic eHh4LXVzNzp4',
             'Content-Type'=>'application/json; charset=utf-8',
-            'User-Agent'=>'createsend-ruby-4.1.2-2.5.1-p57-x86_64-darwin17'
+            'User-Agent'=>'createsend-ruby-4.1.2-2.5.1-p57-x86_64-darwin16'
           }).
           to_return(status: 200, body: "", headers: {})
       expect(email.add_to_list(splash.id)).to eq true
     end
 
-    fit "should subscribe the email to sg" do
+    it "should subscribe the email to sg" do
       my_email = Faker::Internet.email
       email = Email.new email: my_email
       splash = SplashPage.new newsletter_api_token: 123

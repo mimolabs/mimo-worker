@@ -60,6 +60,5 @@ class Email < ApplicationRecord
 
   def location
     @email_location ||= Location.find_by id: location_id
->>>>>>> 7b8a9cd6b5cb5e03030a121f81c366673751ffdf
   end
 end

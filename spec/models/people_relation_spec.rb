@@ -12,7 +12,7 @@ RSpec.describe PeopleRelation, type: :model do
       Station.destroy_all
     end
 
-    fit 'should create a station for a login' do
+    it 'should create a station for a login' do
       t = (Time.now - 10.days).to_i
       s = SplashPage.create location_id: 100
       email = 'simon.morley@egg.com'

@@ -7,7 +7,7 @@ RSpec.describe Email, type: :model do
       REDIS.flushall
     end
 
-    fit "should run subscribe the email to campaign monitor" do
+    it "should run subscribe the email to campaign monitor" do
       splash = SplashPage.new id: 123
 
       opts = {}
@@ -24,7 +24,7 @@ RSpec.describe Email, type: :model do
           headers: {
             'Authorization'=>'Basic eHh4LXVzNzp4',
             'Content-Type'=>'application/json; charset=utf-8',
-            'User-Agent'=>'createsend-ruby-4.1.2-2.5.1-p57-x86_64-darwin17'
+            'User-Agent'=>'createsend-ruby-4.1.2-2.5.1-p57-x86_64-darwin16'
           }).
           to_return(status: 200, body: my_email, headers: {})
 
@@ -41,7 +41,7 @@ RSpec.describe Email, type: :model do
       ### failure - mc
     end
 
-    fit "should not send - list disabled cos of an error" do
+    it "should not send - list disabled cos of an error" do
       splash = SplashPage.new id: 123
 
       opts = {}

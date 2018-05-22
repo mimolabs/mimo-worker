@@ -94,19 +94,19 @@ module MailChimp
   end
   
   def invalid_mc_url(opts)
-    user = User.find_by id: location.try(:user_id)
-    return unless user.present?
+    ### Dont let this happen again! (for a month)
+    REDIS.setex mc_key(opts[:splash_id]), 86400, 'Invalid API token'
 
-    SplashMailer.with(
+    user = User.find_by id: location.try(:user_id)
+    return false unless user.present?
+
+    opts = {
       email: user.email,
       location: location,
       type: 'MailChimp'
-    )
-      .invalid_api_token
-      .deliver_now
+    }
 
-    ### Dont let this happen again! (for a month)
-    REDIS.setex mc_key(opts[:splash_id]), 86400, 'Invalid API token'
+    SplashMailer.with(opts).invalid_api_token.deliver_now
     false
   end
 

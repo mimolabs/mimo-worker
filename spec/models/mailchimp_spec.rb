@@ -7,7 +7,7 @@ RSpec.describe Email, type: :model do
       REDIS.flushall
     end
 
-    fit "should run subscribe the email to mailchimp" do
+    it "should run subscribe the email to mailchimp" do
       splash = SplashPage.new id: 123
 
       opts = {}
@@ -63,7 +63,7 @@ RSpec.describe Email, type: :model do
        expect(val).to eq 'eggs'
     end
 
-    fit "should not send - list disabled cos of an error" do
+    it "should not send - list disabled cos of an error" do
       splash = SplashPage.new id: 123
 
       opts = {}
@@ -79,7 +79,7 @@ RSpec.describe Email, type: :model do
       expect(email.mc_subscribe(opts)).to eq false
     end
 
-    fit "should not send - invalid URL" do
+    it "should not send - invalid URL" do
       splash = SplashPage.new id: 123
 
       opts = {}

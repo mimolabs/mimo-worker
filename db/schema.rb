@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2018_05_21_192106) do
+ActiveRecord::Schema.define(version: 2018_05_19_134903) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -30,6 +30,9 @@ ActiveRecord::Schema.define(version: 2018_05_21_192106) do
     t.integer "location_id"
     t.string "mac_address", limit: 18
     t.string "state", limit: 10
+    t.string "machine_type", limit: 26
+    t.text "description"
+    t.datetime "last_heartbeat"
   end
 
   create_table "emails", force: :cascade do |t|
@@ -241,12 +244,12 @@ ActiveRecord::Schema.define(version: 2018_05_21_192106) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer "location_id"
-    t.string "api_token", limit: 50
-    t.string "host", limit: 50
-    t.string "type", limit: 50
-    t.string "port", limit: 50
-    t.string "username", limit: 50
-    t.string "password", limit: 50
+    t.string "api_token"
+    t.string "host"
+    t.string "integration_type", limit: 10
+    t.string "port", limit: 5
+    t.string "username", limit: 26
+    t.string "password", limit: 26
     t.json "metadata", default: {}
     t.boolean "active"
   end
@@ -345,8 +348,8 @@ ActiveRecord::Schema.define(version: 2018_05_21_192106) do
     t.string "password_btn_font_colour", limit: 22, default: "rgb(0, 0, 0)"
     t.string "access_restrict", limit: 10, default: "none"
     t.string "access_restrict_period", limit: 10, default: "daily"
-    t.string "available_start", limit: 10, default: "00:00"
-    t.string "available_end", limit: 10, default: "00:00"
+    t.string "available_start", limit: 2, default: "00"
+    t.string "available_end", limit: 2, default: "00"
     t.string "input_padding", limit: 10, default: "10px 15px"
     t.string "input_height", limit: 10, default: "40px"
     t.string "input_border_colour", limit: 22, default: "#d0d0d0"
@@ -395,6 +398,7 @@ ActiveRecord::Schema.define(version: 2018_05_21_192106) do
     t.boolean "fb_login_on", default: false
     t.boolean "secondary_access", default: false
     t.boolean "passwd_auto_gen", default: false
+    t.boolean "newsletter_active", default: false
     t.boolean "skip_user_registration", default: false
     t.boolean "g_redirect_to_page", default: false
     t.boolean "g_login_on", default: false
@@ -435,7 +439,7 @@ ActiveRecord::Schema.define(version: 2018_05_21_192106) do
     t.text "networks", array: true
     t.string "twilio_user", limit: 50
     t.string "twilio_pass", limit: 50
-    t.boolean "newsletter_active", default: false
+    t.string "twilio_from", limit: 15
     t.index ["location_id"], name: "index_splash_on_location_id"
   end
 
