@@ -1,0 +1,10 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>Hey,<br><br>There's been an error with your <%= @type %> settings for a splash page in <%= @location.try(:location_name) || 'unknown location' %>. <b>Your API token is invalid</b>. Please read the <%= @type %> docs to find a valid API token.</p>
+    <p>Update your splash page accordingly. No emails will be added until you resolve this error.<br><br>Thanks!</p>
+  </body>
+</html>

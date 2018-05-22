@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>Hey,<br><br>There's been an error with your <%= @type %> settings for a splash page in <%= @location.try(:location_name) || 'unknown location' %>. </p>
+    <% if @error.present? -%>
+      <p>The following error occurred:</p>
+      <p><b><%= @error %></b></p>
+    <% end -%>
+
+    <% if @url.present? %>
+      <p>The following guide has more information:</p>
+      <p><%= @url %></p>
+    <% end -%>
+
+    <p>Update your splash page accordingly. No emails will be added until you resolve this error.</p>
+
+  </body>
+</html>
