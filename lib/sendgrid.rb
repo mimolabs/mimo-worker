@@ -86,23 +86,24 @@ module Sendgrid
       REDIS.setex sg_key(id), 86400, message
     end
 
-    send_sg_error(sg_error_code_body(response))
+    send_sg_error(response)
   end
   
-  def send_sg_error(body)
-    puts 'Should send SG error!'
-  end
-  
-  def sg_error_code_body(response)
-    # return 'Hey,<br><br>There was an error with your Sendgrid settings. Please check your splash settings.' unless response.present?
+  def send_sg_error(response)
+    user = User.find_by id: location.try(:user_id)
+    return unless user.present?
 
-    # message = JSON.parse(response.body)["errors"][0]["message"]
+    opts = {
+      email: user.email,
+      location: location,
+      type: 'SendGrid'
+    }
 
-    # body =
-    #   "Hey,<br><br>There's been an error with your Sendgrid settings for a splash page in #{location.try(:location_name) || 'unknown location'}:<br><br>"+
-    #   "#{message}.<br><br>"+
-    #   "Update your splash page accordingly. No emails will be added until you resolve this error.<br><br>Thanks!"
+    if response.body.present?
+      error = JSON.parse(response.body)['errors'][0]['message']
+      opts[:error]  = error
+    end
 
-    # return body
+    SplashMailer.with(opts).generic_error.deliver_now
   end
 end

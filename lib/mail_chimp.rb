@@ -34,7 +34,6 @@ module MailChimp
     body = JSON.parse(response.body)
     REDIS.setex mc_key(id), 86400, body['detail']
     puts "Disabling splash newsletter since we have an error jim"
-    # send_mc_error(mc_error_code_body(response))
     mc_error_code_body(response)
     false
   end
@@ -94,7 +93,6 @@ module MailChimp
   end
   
   def invalid_mc_url(opts)
-    ### Dont let this happen again! (for a month)
     REDIS.setex mc_key(opts[:splash_id]), 86400, 'Invalid API token'
 
     user = User.find_by id: location.try(:user_id)
@@ -110,12 +108,7 @@ module MailChimp
     false
   end
 
-  def send_mc_error(body)
-    puts 'Should send error email!!!!!!'
-  end
-
   def mc_error_code_body(body)
-
     user = User.find_by id: location.try(:user_id)
     return unless user.present?
 
