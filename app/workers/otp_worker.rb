@@ -1,5 +1,6 @@
-class OtpWorker
+# frozen_string_literal: true
 
+class OtpWorker
   include Sidekiq::Worker
 
   def perform(opts)

@@ -34,7 +34,8 @@ module MailChimp
     body = JSON.parse(response.body)
     REDIS.setex mc_key(id), 86400, body['detail']
     puts "Disabling splash newsletter since we have an error jim"
-    send_mc_error(mc_error_code_body(response))
+    # send_mc_error(mc_error_code_body(response))
+    mc_error_code_body(response)
     false
   end
 
@@ -93,8 +94,13 @@ module MailChimp
   end
   
   def invalid_mc_url(opts)
-    puts 'Will send email to user if invalid'
-    send_mc_error(mc_invalid_api_token)
+    SplashMailer.with(
+      email: 'simon@polkaspots.com',
+      location: location,
+      type: 'MailChimp'
+    )
+      .invalid_api_token
+      .deliver_now
 
     ### Dont let this happen again! (for a month)
     REDIS.setex mc_key(opts[:splash_id]), 86400, 'Invalid API token'
@@ -105,16 +111,18 @@ module MailChimp
     puts 'Should send error email!!!!!!'
   end
 
-  def mc_invalid_api_token
-    # body =
-    #   "Hey,<br><br>There's been an error with your MailChimp settings for a splash page in #{location.try(:location_name) || 'unknown location'}. Your API token is invalid. Please read the MailChimp docs to find a valid API token.<br><br>"+
-    #   "Update your splash page accordingly. No emails will be added until you resolve this error.<br><br>Thanks!"
-
-    # return body
-  end
-
   def mc_error_code_body(body)
-    # return 'Hey,<br><br>There was an error with your MailChimp settings. Please check your splash settings.' unless body.present?
+    opts = {
+      email: 'simon@polkaspots.com',
+      location: location,
+      type: 'MailChimp'
+    }
+    if body.present?
+      opts[:url]    = body['type'] 
+      opts[:error]  = body['detail'] 
+    end
+
+    SplashMailer.with(opts).generic_error.deliver_now
 
     # body =
     #   "Hey,<br><br>There's been an error with your MailChimp settings for a splash page in #{location.try(:location_name) || 'unknown location'}:<br><br>"+

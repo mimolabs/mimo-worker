@@ -59,8 +59,20 @@ module Sendgrid
     return true
   end
 
+  def sg_invalid_api_token
+    SplashMailer.with(
+      email: 'simon@polkaspots.com',
+      location: location,
+      type: 'SendGrid'
+    )
+      .invalid_api_token
+      .deliver_now
+  end
+
   def sg_error(response,id)
     if response.status == 401
+      sg_invalid_api_token
+
       message = 'Invalid API token'
       REDIS.setex sg_key(id), 86400, message
     end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Email < ApplicationRecord
   include MailChimp
   include CampaignMonitor
@@ -6,12 +8,12 @@ class Email < ApplicationRecord
   def add_to_list(splash_id)
     splash = SplashPage.find_by(id: splash_id)
     return false unless splash && allowed?(splash)
-   
-    opts = { 
+
+    opts = {
       splash_id: splash.id,
       type: splash.newsletter_type,
       token: splash.newsletter_api_token,
-      list: splash.newsletter_list_id,
+      list: splash.newsletter_list_id
     }
     subscribe_newsletter(opts)
   end
@@ -28,7 +30,7 @@ class Email < ApplicationRecord
   end
 
   def allowed?(splash)
-    splash.newsletter_active && 
+    splash.newsletter_active &&
       splash.newsletter_api_token && \
       splash.newsletter_list_id && \
       splash.newsletter_type > 1
@@ -36,7 +38,11 @@ class Email < ApplicationRecord
 
   ### Helpers
   def email_in_list
-    puts "Email already in that list"
+    puts 'Email already in that list'
     false
+  end
+
+  def location
+    @email_location ||= Location.find_by id: location_id
   end
 end

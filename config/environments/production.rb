@@ -94,13 +94,16 @@ Rails.application.configure do
   config.active_record.dump_schema_after_migration = false
 
   config.action_mailer.delivery_method = :smtp
+
+  mimo_config = YAML.safe_load(ERB.new(File.read('config/mimo-config.yml')).result)
+
   config.action_mailer.smtp_settings = {
-    address:              ENV[MIMO_SMTP_ADDRESS]  || 'smtp.sendgrid.net',
-    port:                 ENV[MIMO_SMTP_PORT]     || '2525',
-    domain:               ENV[MIMO_SMTP_DOMAIN]   || 'domain.com',
-    user_name:            ENV[MIMO_SMTP_USER]     || 'username',
-    password:             ENV[MIMO_SMTP_PASS]     || 'password',
-    authentication:       ENV[MIMO_SMTP_AUTH]     || 'plain',
-    enable_starttls_auto: ENV[MIMO_SMTP_TLS]      || true 
+    address:                mimo_config['mailer']['address'],
+    port:                   mimo_config['mailer']['port'],
+    domain:                 mimo_config['mailer']['domain'],
+    user_name:              mimo_config['mailer']['username'],
+    password:               mimo_config['mailer']['password'],
+    authentication:         mimo_config['mailer']['auth'] || 'plain',
+    enable_starttls_auto:   mimo_config['mailer']['tls']  || true 
   }
 end
