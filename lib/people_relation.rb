@@ -34,7 +34,6 @@ module PeopleRelation
     if opts[:email].present? && person.email.blank?
       person.email = opts[:email].downcase
       person.consented = false
-      opts[:type] = 'email'
     end
    
     if person.new_record?
@@ -54,6 +53,7 @@ module PeopleRelation
     end
 
     person.save
+    opts[:person_id] = person.id
 
     if station.new_record? || station.person_id.blank?# || station.person_id != person.try(:id).to_s
       station.person_id = person.id
@@ -62,7 +62,17 @@ module PeopleRelation
 
     ### Create the email 
     opts[:person_id] = person.id
-    Email.create_record(opts) if opts[:email].present?
+    if opts[:email].present?
+      opts[:type] = 'email'
+      Email.create_record(opts) 
+    end
+
+    ### Create the OTP
+    if opts[:otp] == 'true'
+      opts[:type] = 'sms'
+      number = create_sms(opts)
+      opts[:sms_number] = number 
+    end
 
     ### records the terms agreed timeline event 
     record_terms_agreement(opts)
@@ -78,6 +88,18 @@ module PeopleRelation
 
   def self.calc_timestamp(opts)
     return opts[:timestamp].present? ? Time.at(opts[:timestamp]) : Time.now
+  end
+
+  def self.create_sms(opts)
+    sms = Sms.find_by(
+      location_id: opts[:location_id], 
+      client_mac: opts[:client_mac]
+    )
+    return unless sms.present?
+
+    return unless sms.update(person_id: opts[:person_id])
+
+    sms.try(:number)
   end
 
   def self.record_terms_agreement(opts)

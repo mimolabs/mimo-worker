@@ -2,7 +2,7 @@ require 'rails_helper'
 
 RSpec.describe PeopleRelation, type: :model do
 
-  let(:client_mac) { (1..6).map{"%0.2X"%rand(256)}.join('-') }
+  let(:mac) { (1..6).map{"%0.2X"%rand(256)}.join('-') }
   let(:ap_mac) { (1..6).map{"%0.2X"%rand(256)}.join('-') }
 
   describe 'create people relations - after logging in' do
@@ -10,23 +10,25 @@ RSpec.describe PeopleRelation, type: :model do
     before(:each) do
       Person.destroy_all
       Station.destroy_all
+      Sms.destroy_all
     end
 
     fit 'should create a station for a login' do
+      client_mac = mac
       t = (Time.now - 10.days).to_i
       s = SplashPage.create location_id: 100
+      sms = Sms.create(location_id: 1000, client_mac: client_mac, number: '1234')
       email = 'simon.morley@egg.com'
     
       opts = {}
       opts['client_mac'] = client_mac
-      opts['location_id'] = 100
       opts['splash_id'] = s.id
       opts['timestamp'] = t
       opts['email'] = email
       opts['location_id'] = 1000
       opts['ap_mac'] = ap_mac
-      opts['sms_number'] = '1234'
       opts['consent'] = { 'terms': true }
+      opts['otp'] = 'true'
 
       expect(PeopleRelation.record(opts)).to eq true
 
@@ -60,7 +62,7 @@ RSpec.describe PeopleRelation, type: :model do
       expect(pt.meta['client_mac']).to eq client_mac
 
       ### Person Terms Timeline
-      pt = PersonTimeline.where(event: 'sign_in_email').first
+      pt = PersonTimeline.where(event: 'sign_in_sms').first
       expect(pt.person_id).to eq person.id
       expect(pt.location_id).to eq 1000
       expect(pt.created_at).to eq Time.at t
@@ -78,7 +80,7 @@ RSpec.describe PeopleRelation, type: :model do
       expect(person.email).to eq email
 
       # otp
-      # terms timeline
+      expect(sms.reload.person_id).to eq person.id
     end
 
     fit 'should not create terms timeline - not consent' do
@@ -87,7 +89,7 @@ RSpec.describe PeopleRelation, type: :model do
       email = 'simon.morley@egg.com'
     
       opts = {}
-      opts['client_mac'] = client_mac
+      opts['client_mac'] = mac
       opts['location_id'] = 100
       opts['splash_id'] = s.id
       opts['timestamp'] = t
