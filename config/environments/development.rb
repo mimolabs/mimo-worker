@@ -60,12 +60,15 @@ Rails.application.configure do
   config.file_watcher = ActiveSupport::EventedFileUpdateChecker
 
   config.action_mailer.delivery_method = :smtp
+
+  mimo_config = YAML.safe_load(ERB.new(File.read(File.dirname(__FILE__) + '/../mimo-config.yml')).result)
+
   config.action_mailer.smtp_settings = {
     address:              'smtp.sendgrid.net',
-    port:                 2525,
-    domain:               'oh-mimo.com',
-    user_name:            'my-email',
-    password:             'xxxxxxx',
+    port:                 '2525',
+    domain:               'domain.com',
+    user_name:            'username',
+    password:             'password',
     authentication:       'plain',
     enable_starttls_auto: true 
   }

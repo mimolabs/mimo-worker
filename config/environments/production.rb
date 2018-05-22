@@ -58,6 +58,7 @@ Rails.application.configure do
 
   # Use a different cache store in production.
   # config.cache_store = :mem_cache_store
+  config.cache_store = :redis_store, "redis://redis:6379/0/cache", { expires_in: 90.minutes }
 
   # Use a real queuing backend for Active Job (and separate queues per environment)
   # config.active_job.queue_adapter     = :resque
@@ -91,4 +92,15 @@ Rails.application.configure do
 
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
+
+  config.action_mailer.delivery_method = :smtp
+  config.action_mailer.smtp_settings = {
+    address:              ENV[MIMO_SMTP_ADDRESS]  || 'smtp.sendgrid.net',
+    port:                 ENV[MIMO_SMTP_PORT]     || '2525',
+    domain:               ENV[MIMO_SMTP_DOMAIN]   || 'domain.com',
+    user_name:            ENV[MIMO_SMTP_USER]     || 'username',
+    password:             ENV[MIMO_SMTP_PASS]     || 'password',
+    authentication:       ENV[MIMO_SMTP_AUTH]     || 'plain',
+    enable_starttls_auto: ENV[MIMO_SMTP_TLS]      || true 
+  }
 end
