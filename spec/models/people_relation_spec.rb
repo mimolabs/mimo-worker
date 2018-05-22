@@ -12,11 +12,11 @@ RSpec.describe PeopleRelation, type: :model do
       Station.destroy_all
     end
 
-    it 'should create a station for a login' do
+    fit 'should create a station for a login' do
       t = (Time.now - 10.days).to_i
       s = SplashPage.create location_id: 100
       email = 'simon.morley@egg.com'
-
+    
       opts = {}
       opts['client_mac'] = client_mac
       opts['location_id'] = 100
@@ -25,6 +25,8 @@ RSpec.describe PeopleRelation, type: :model do
       opts['email'] = email
       opts['location_id'] = 1000
       opts['ap_mac'] = ap_mac
+      opts['sms_number'] = '1234'
+      opts['consent'] = { 'terms': true }
 
       expect(PeopleRelation.record(opts)).to eq true
 
@@ -35,6 +37,8 @@ RSpec.describe PeopleRelation, type: :model do
       expect(station.client_mac).to eq client_mac
       expect(station.person_id).to eq person.id
 
+      ls = person.last_seen
+      expect(ls).to be_present
       expect(person.email).to eq email
       expect(person.consented).to eq false
       expect(person.username).to eq 'Simon Morley'
@@ -48,10 +52,56 @@ RSpec.describe PeopleRelation, type: :model do
       expect(e.consented).to eq false
       expect(e.person_id).to eq person.id
 
+      ### Terms Timeline
+      pt = PersonTimeline.where(event: 'agreement_terms').first
+      expect(pt.person_id).to eq person.id
+      expect(pt.location_id).to eq 1000
+      expect(pt.created_at).to eq Time.at t
+      expect(pt.meta['client_mac']).to eq client_mac
+
+      ### Person Terms Timeline
+      pt = PersonTimeline.where(event: 'sign_in_email').first
+      expect(pt.person_id).to eq person.id
+      expect(pt.location_id).to eq 1000
+      expect(pt.created_at).to eq Time.at t
+      expect(pt.meta['client_mac']).to eq client_mac
+      expect(pt.meta['email']).to eq email
+      expect(pt.meta['sms']).to eq '1234'
+
+      ### ensure we update the email
+      person.update email: nil
+
+      expect(PeopleRelation.record(opts)).to eq true
+      expect(person.reload.login_count).to eq 2
+      expect(person.last_seen).to be_present
+      expect(person.last_seen).to_not eq ls
+      expect(person.email).to eq email
+
+      # otp
       # terms timeline
-      # sign in timeline 
+    end
+
+    fit 'should not create terms timeline - not consent' do
+      t = (Time.now - 10.days).to_i
+      s = SplashPage.create location_id: 100
+      email = 'simon.morley@egg.com'
+    
+      opts = {}
+      opts['client_mac'] = client_mac
+      opts['location_id'] = 100
+      opts['splash_id'] = s.id
+      opts['timestamp'] = t
+      opts['email'] = email
+      opts['location_id'] = 1000
+      opts['ap_mac'] = ap_mac
+      opts['sms_number'] = '1234'
+
+      expect(PeopleRelation.record(opts)).to eq true
+      pt = PersonTimeline.where(event: 'agreement_terms').first
+      expect(pt).to eq nil
     end
   end
+
 
   it 'should mark as consented for external email capture' do
     ## include the email too
