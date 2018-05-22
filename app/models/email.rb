@@ -5,20 +5,32 @@ class Email < ApplicationRecord
 
   def self.create_record(opts)
     e = Email.find_or_initialize_by(
-      email:        opts[:email],
+      email:        opts[:email].downcase,
       location_id:  opts[:location_id]
     )
-    # e.splash_id ||= opts['splash_id']
     e.person_id = opts[:person_id]
-    # e.add_to_list(opts['splash_id'], opts['mergedata'])
-    # e.client_id = e.client(opts['mac'])                  if e.client_id.blank?
-    # e.record_event #unless e.persisted?
     # if (opts[:external_capture] && opts[:mimo] == false) || opts['double_opt_in'] == false
     #   e.consented = true
-    # elsif e.new_record?
-    #   send_doi_email(opts, e.id.to_s)
-    # end
+    if e.new_record?
+      e.send_double_opt_in_email
+    end
     e.save if e.new_record?
+  end
+
+  def send_double_opt_in_email
+    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
+    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
+    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
+    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
+    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
+
+    link = 'my-link-should-be-finished'
+    opts = {
+      email: email,
+      link: link
+    }
+
+    EmailMailer.with(opts).double_opt_in_email.deliver_now
   end
 
   def add_to_list(splash_id)

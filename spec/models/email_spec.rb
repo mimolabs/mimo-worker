@@ -1,7 +1,32 @@
 require 'rails_helper'
 
 RSpec.describe Email, type: :model do
-  describe 'sending OTP' do
+
+  describe 'general creation stuff' do
+
+    it 'should create the email with the right params' do
+      Email.destroy_all
+
+      e = Faker::Internet.email
+      opts = {}
+      opts[:email] = e.upcase
+      opts[:location_id] = 100
+      opts[:person_id] = 200
+    
+      expect { Email.create_record(opts) }.to change { ActionMailer::Base.deliveries.count }.by(1)
+
+      email = Email.last
+      expect(email.location_id).to eq 100
+      expect(email.person_id).to eq 200
+      expect(email.email).to eq e.downcase
+
+      # should have set redis
+
+    end
+
+  end
+
+  describe 'integration syncs' do
 
     before(:each) do 
       REDIS.flushall
