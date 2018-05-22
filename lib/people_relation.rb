@@ -78,6 +78,18 @@ module PeopleRelation
       opts[:sms_number] = number 
     end
 
+    if opts[:social_type].present?
+      Social.last
+      # opts[:type] = opts[:social_type]
+      # Social.process_fetch(opts)
+      # unless [true, 'true'].include?(opts[:consent]['email'])
+      #   social = Social.where(location_id: opts[:location_id], person_id: opts[:person_id]).order(updated_at: :asc).last
+      #   if social.present?
+      #     social.update email: nil
+      #   end
+      # end
+    end
+
     ### records the terms agreed timeline event 
     record_terms_agreement(opts)
 
