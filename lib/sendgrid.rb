@@ -60,8 +60,11 @@ module Sendgrid
   end
 
   def sg_invalid_api_token
+    user = User.find_by id: location.try(:user_id)
+    return unless user.present?
+
     SplashMailer.with(
-      email: 'simon@polkaspots.com',
+      email: user.email,
       location: location,
       type: 'SendGrid'
     )

@@ -94,8 +94,11 @@ module MailChimp
   end
   
   def invalid_mc_url(opts)
+    user = User.find_by id: location.try(:user_id)
+    return unless user.present?
+
     SplashMailer.with(
-      email: 'simon@polkaspots.com',
+      email: user.email,
       location: location,
       type: 'MailChimp'
     )
@@ -112,25 +115,21 @@ module MailChimp
   end
 
   def mc_error_code_body(body)
+
+    user = User.find_by id: location.try(:user_id)
+    return unless user.present?
+
     opts = {
-      email: 'simon@polkaspots.com',
+      email: user.email,
       location: location,
       type: 'MailChimp'
     }
+
     if body.present?
       opts[:url]    = body['type'] 
       opts[:error]  = body['detail'] 
     end
 
     SplashMailer.with(opts).generic_error.deliver_now
-
-    # body =
-    #   "Hey,<br><br>There's been an error with your MailChimp settings for a splash page in #{location.try(:location_name) || 'unknown location'}:<br><br>"+
-    #   "#{body['detail']}.<br><br>"+
-    #   "Please read the following guide for more information:<br><br>"+
-    #   "#{body['type']}<br><br>"+
-    #   "Update your splash page accordingly. No emails will be added until you resolve this error.<br><br>Thanks!"
-
-    # return body
   end
 end
