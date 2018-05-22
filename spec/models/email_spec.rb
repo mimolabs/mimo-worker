@@ -4,7 +4,7 @@ RSpec.describe Email, type: :model do
 
   describe 'general creation stuff' do
 
-    it 'should create the email with the right params' do
+    fit 'should create the email with the right params' do
       Email.destroy_all
 
       e = Faker::Internet.email
@@ -19,11 +19,46 @@ RSpec.describe Email, type: :model do
       expect(email.location_id).to eq 100
       expect(email.person_id).to eq 200
       expect(email.email).to eq e.downcase
+      expect(email.consented).to eq false
 
-      # should have set redis
-
+      key = "doubleOptIn:#{email.id}"
+      code = REDIS.get key
+      expect(code).to be_present
+      
+      expect { Email.create_record(opts) }.to change { ActionMailer::Base.deliveries.count }.by(0)
     end
 
+    fit 'should confirm the external capture emails' do
+      Email.destroy_all
+
+      e = Faker::Internet.email
+      opts = {}
+      opts[:email] = e.upcase
+      opts[:location_id] = 100
+      opts[:person_id] = 200
+      opts[:external_capture] = true
+    
+      expect { Email.create_record(opts) }.to change { ActionMailer::Base.deliveries.count }.by(1)
+
+      email = Email.last
+      expect(email.consented).to eq true
+    end
+
+    fit 'should confirm the email if Double Opt In Disabled' do
+      Email.destroy_all
+
+      e = Faker::Internet.email
+      opts = {}
+      opts[:email] = e.upcase
+      opts[:location_id] = 100
+      opts[:person_id] = 200
+      opts[:double_opt_in] = false
+    
+      expect { Email.create_record(opts) }.to change { ActionMailer::Base.deliveries.count }.by(1)
+
+      email = Email.last
+      expect(email.consented).to eq true
+    end
   end
 
   describe 'integration syncs' do

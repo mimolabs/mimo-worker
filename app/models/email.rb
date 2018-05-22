@@ -8,26 +8,29 @@ class Email < ApplicationRecord
       email:        opts[:email].downcase,
       location_id:  opts[:location_id]
     )
+
     e.person_id = opts[:person_id]
-    # if (opts[:external_capture] && opts[:mimo] == false) || opts['double_opt_in'] == false
-    #   e.consented = true
-    if e.new_record?
-      e.send_double_opt_in_email
+
+    if opts[:external_capture] || opts[:double_opt_in] == false
+      e.consented = true
     end
-    e.save if e.new_record?
+
+    send_double_opt_in = e.new_record? ? true : false
+    e.save 
+
+    return unless send_double_opt_in
+    e.send_double_opt_in_email 
   end
 
   def send_double_opt_in_email
-    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
-    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
-    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
-    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
-    # $redis.setex("doubleOptIn:#{email_id}", 60*60*24*7, code)
+    code = SecureRandom.hex
+    REDIS.setex("doubleOptIn:#{id}", 60*60*24*7, code)
+    link = MIMO_CONFIG['dashboard']['url']
 
-    link = 'my-link-should-be-finished'
     opts = {
       email: email,
-      link: link
+      link: link,
+      code: code
     }
 
     EmailMailer.with(opts).double_opt_in_email.deliver_now
