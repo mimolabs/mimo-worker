@@ -5,10 +5,14 @@ module Twitter
 
   ## 
   # Uses the Twitter API to fetch a profile by using an access token.
+  # Uses the get_twitter_bearer function to grab the right tokens for the auth.
+  # Also requires the enviroment variables to be set 
+  # ENV['TWITTER_CONSUMER_KEY'] & ENV['TWITTER_CONSUMER_SECRET']
   #
   # Returns a hash of the person
 
   def self.fetch(auth)
+    return {} unless twitter_creds
     bearer = get_twitter_bearer
     return unless bearer
     url = "https://api.twitter.com/1.1/users/show.json\?screen_name=#{auth[:screen_name]}"
@@ -43,5 +47,9 @@ module Twitter
       body = JSON.parse(resp.body)
       return body['access_token']
     end
+  end
+
+  def twitter_creds
+    ENV['TWITTER_CONSUMER_KEY'] && ENV['TWITTER_CONSUMER_SECRET']
   end
 end
