@@ -27,3 +27,6 @@
 
 # private params
 /config/mimo-config.yml
+
+doc
+doc/*
