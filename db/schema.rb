@@ -212,41 +212,22 @@ ActiveRecord::Schema.define(version: 2018_05_22_125523) do
     t.integer "location_id"
     t.string "facebook_id", limit: 24
     t.string "google_id", limit: 24
-    t.string "tw_profile_image", limit: 24
     t.string "email", limit: 50
     t.string "first_name", limit: 24
     t.string "last_name", limit: 24
     t.string "gender", limit: 6
-    t.string "fb_username", limit: 24
-    t.string "fb_link", limit: 24
-    t.string "fb_full_name", limit: 24
-    t.string "fb_current_location", limit: 24
-    t.string "g_link", limit: 24
-    t.string "g_image_url"
-    t.string "g_etag", limit: 24
-    t.string "g_full_name", limit: 24
-    t.string "g_urrent_location", limit: 24
     t.string "current_location", limit: 24
     t.string "twitter_id", limit: 24
-    t.string "tw_full_name", limit: 24
-    t.string "tw_screen_name", limit: 24
-    t.string "tw_description", limit: 24
-    t.string "tw_url"
     t.integer "person_id"
-    t.integer "tw_followers"
-    t.integer "tw_friends"
     t.integer "checkins"
     t.text "location_ids", array: true
     t.text "splash_ids", array: true
     t.text "emails", array: true
-    t.text "clientMacs", array: true
     t.text "client_ids", array: true
-    t.text "gOrganisations", array: true
     t.text "networks", array: true
     t.text "lonlat", array: true
-    t.text "locations", array: true
-    t.boolean "tw_verified"
     t.boolean "newsletter", default: false
+    t.json "meta"
   end
 
   create_table "splash_integrations", force: :cascade do |t|
@@ -357,8 +338,8 @@ ActiveRecord::Schema.define(version: 2018_05_22_125523) do
     t.string "password_btn_font_colour", limit: 22, default: "rgb(0, 0, 0)"
     t.string "access_restrict", limit: 10, default: "none"
     t.string "access_restrict_period", limit: 10, default: "daily"
-    t.string "available_start", limit: 2, default: "00"
-    t.string "available_end", limit: 2, default: "00"
+    t.string "available_start", limit: 10, default: "00:00"
+    t.string "available_end", limit: 10, default: "00:00"
     t.string "input_padding", limit: 10, default: "10px 15px"
     t.string "input_height", limit: 10, default: "40px"
     t.string "input_border_colour", limit: 22, default: "#d0d0d0"
@@ -407,7 +388,6 @@ ActiveRecord::Schema.define(version: 2018_05_22_125523) do
     t.boolean "fb_login_on", default: false
     t.boolean "secondary_access", default: false
     t.boolean "passwd_auto_gen", default: false
-    t.boolean "newsletter_active", default: false
     t.boolean "skip_user_registration", default: false
     t.boolean "g_redirect_to_page", default: false
     t.boolean "g_login_on", default: false
@@ -446,6 +426,7 @@ ActiveRecord::Schema.define(version: 2018_05_22_125523) do
     t.text "passwd_change_day", array: true
     t.text "tags", array: true
     t.text "networks", array: true
+    t.boolean "newsletter_active", default: false
     t.string "twilio_user", limit: 50
     t.string "twilio_pass", limit: 50
     t.string "twilio_from", limit: 15
