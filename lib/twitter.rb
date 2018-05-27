@@ -20,7 +20,9 @@ module Twitter
     end
     case resp.status
     when 200
-      return JSON.parse(resp.body)
+      details = JSON.parse(resp.body)
+      details['type'] = 'twitter'
+      details
     end
   end
   
