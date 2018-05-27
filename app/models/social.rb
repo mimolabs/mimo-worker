@@ -47,7 +47,25 @@ class Social < ApplicationRecord
     social.meta ||= {}
     social.email = body['email']
     social.meta['facebook'] = body
+
+    social.clean(body) 
+    social.person_id = body['person_id']
+
     social.save
+  end
+
+  ## 
+  # Cleans up old stations and persons. 
+  #
+  # A user checks in via FB on one device. A station and person are created.
+  # Later they checkin with a different device, same FB account.
+  # We merge the details in, remove the old person and update station.
+  def clean(body)
+    if person_id && (person_id != body['person_id'])
+      s = Station.find_by(person_id: body['person_id'])
+      s.update_columns person_id: person_id if s.present?
+      Person.find_by(id: body['person_id']).destroy
+    end
   end
 
 end

@@ -6,6 +6,12 @@ RSpec.describe Social, type: :model do
 
   describe 'restful requests to fetch social details' do
 
+    before(:each) do
+      Person.destroy_all
+      Social.destroy_all
+      Station.destroy_all
+    end
+
     it 'should fetch a facebook profile' do
 
     end
@@ -44,18 +50,56 @@ RSpec.describe Social, type: :model do
       body = {"id"=>"my-id", "name"=>"Jenny The Cat", "email"=>"jenny@me.com", "link"=>"https://www.facebook.com/app_scoped_user_id/xxx/", "first_name"=>"Jenny", "last_name"=>"Cat", "gender"=>"mixed"}
 
       client_mac = mac
+      p = Person.create client_mac: client_mac
 
       body['location_id']   = 123
       body['client_mac']    = client_mac
-      body['person_id']     = 1
+      body['person_id']     = p.id
 
       s = Social.create_facebook(body)
       expect(s).to eq true
 
       s = Social.last
       expect(s.location_id).to eq 123
+      expect(s.person_id).to eq 1
       expect(s.email).to eq 'jenny@me.com'
       expect(s.meta['facebook']['link']).to eq 'https://www.facebook.com/app_scoped_user_id/xxx/'
+    end
+
+    ## Checks in via fb on one device
+    ## Station and person are created
+    ## Checks in again later on another device
+    ## There should be one person, one social, two stations
+    it 'should create a social and update the station with the correct person id' do
+      body = {"id"=>"my-id", "name"=>"Jenny The Cat", "email"=>"jenny@me.com", "link"=>"https://www.facebook.com/app_scoped_user_id/xxx/", "first_name"=>"Jenny", "last_name"=>"Cat", "gender"=>"mixed"}
+
+      client_mac = mac
+
+      p = Person.create client_mac: client_mac
+      Station.create client_mac: client_mac, person_id: p.id
+
+      body['location_id']   = 123
+      body['client_mac']    = client_mac
+      body['person_id']     = p.id
+
+      Social.create_facebook(body)
+      s = Social.last
+      expect(s.location_id).to eq 123
+      expect(s.person_id).to eq p.id
+      expect(s.email).to eq 'jenny@me.com'
+
+      client_mac_next = client_mac
+      
+      p2 = Person.create! client_mac: client_mac_next
+      st = Station.create! client_mac: client_mac_next, person_id: p2.id
+      expect(Person.all.size).to eq 2
+
+      body['person_id'] = p2.id
+
+      Social.create_facebook(body)
+      expect(Social.all.size).to eq 1
+      expect(Person.all.size).to eq 1
+      expect(st.person_id).to eq p2.id
     end
 
   end
