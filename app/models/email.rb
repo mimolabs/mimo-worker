@@ -23,17 +23,23 @@ class Email < ApplicationRecord
   end
 
   def send_double_opt_in_email
-    code = SecureRandom.hex
-    REDIS.setex("doubleOptIn:#{id}", 60*60*24*7, code)
+    code = create_doi_code
+
     link = MIMO_CONFIG['dashboard']['url']
+    link = "https://#{link}/#/doi/#{id}?code=#{code}"
 
     opts = {
       email: email,
-      link: link,
-      code: code
+      link: link
     }
 
     EmailMailer.with(opts).double_opt_in_email.deliver_now
+  end
+
+  def create_doi_code
+    code = SecureRandom.hex
+    REDIS.setex("doubleOptIn:#{id}", 60*60*24*7, code)
+    code
   end
 
   def add_to_list(splash_id)

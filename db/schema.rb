@@ -338,8 +338,8 @@ ActiveRecord::Schema.define(version: 2018_05_22_125523) do
     t.string "password_btn_font_colour", limit: 22, default: "rgb(0, 0, 0)"
     t.string "access_restrict", limit: 10, default: "none"
     t.string "access_restrict_period", limit: 10, default: "daily"
-    t.string "available_start", limit: 10, default: "00:00"
-    t.string "available_end", limit: 10, default: "00:00"
+    t.string "available_start", limit: 2, default: "00"
+    t.string "available_end", limit: 2, default: "00"
     t.string "input_padding", limit: 10, default: "10px 15px"
     t.string "input_height", limit: 10, default: "40px"
     t.string "input_border_colour", limit: 22, default: "#d0d0d0"
@@ -388,6 +388,7 @@ ActiveRecord::Schema.define(version: 2018_05_22_125523) do
     t.boolean "fb_login_on", default: false
     t.boolean "secondary_access", default: false
     t.boolean "passwd_auto_gen", default: false
+    t.boolean "newsletter_active", default: false
     t.boolean "skip_user_registration", default: false
     t.boolean "g_redirect_to_page", default: false
     t.boolean "g_login_on", default: false
@@ -426,7 +427,6 @@ ActiveRecord::Schema.define(version: 2018_05_22_125523) do
     t.text "passwd_change_day", array: true
     t.text "tags", array: true
     t.text "networks", array: true
-    t.boolean "newsletter_active", default: false
     t.string "twilio_user", limit: 50
     t.string "twilio_pass", limit: 50
     t.string "twilio_from", limit: 15

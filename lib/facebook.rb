@@ -26,7 +26,9 @@ module Facebook
 
     case response.status
     when 200
-      return JSON.parse(response.body)
+      body = JSON.parse(response.body)
+      body['type'] = 'facebook'
+      return body
     end
   end
 

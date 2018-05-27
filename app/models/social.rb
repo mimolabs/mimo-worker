@@ -38,17 +38,25 @@ class Social < ApplicationRecord
     return details
   end
 
-  def self.create_facebook(body)
-    social = Social.find_or_initialize_by(
-      location_id: body['location_id'],
-      facebook_id: body['id']
-    )
+  def self.create_social(body)
+    opts = {}
+    opts[:location_id] = body['location_id']
+    
+    if body['type'] == 'facebook'
+      opts[:facebook_id] = body['id']
+    end
+
+    social = Social.find_or_initialize_by(opts)
 
     social.meta ||= {}
     social.email = body['email']
-    social.meta['facebook'] = body
 
-    social.clean(body) 
+    if body['type'] == 'facebook'
+      social.meta['facebook'] = body
+      social.facebook_id ||= body['id']
+    end
+
+    social.clean_station_and_people(body) 
     social.person_id = body['person_id']
 
     social.save
@@ -60,7 +68,8 @@ class Social < ApplicationRecord
   # A user checks in via FB on one device. A station and person are created.
   # Later they checkin with a different device, same FB account.
   # We merge the details in, remove the old person and update station.
-  def clean(body)
+
+  def clean_station_and_people(body)
     if person_id && (person_id != body['person_id'])
       s = Station.find_by(person_id: body['person_id'])
       s.update_columns person_id: person_id if s.present?

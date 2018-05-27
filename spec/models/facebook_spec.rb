@@ -21,6 +21,7 @@ RSpec.describe Facebook, type: :model do
       details = Facebook.fetch(opts)
       expect(details['id']).to eq 'my-id'
       expect(details['name']).to eq 'Jenny The Cat'
+      expect(details['type']).to eq 'facebook'
     end
   end
 end
