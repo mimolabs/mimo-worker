@@ -6,7 +6,7 @@ module Google
   ## 
   # Uses the Google API to fetch a profile by using an access token.
   #
-  # Returns a hash
+  # Returns a hash of the person
 
   def self.fetch(auth)
     url   = "https://www.googleapis.com/plus/v1/people/me"

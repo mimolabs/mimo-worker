@@ -46,6 +46,10 @@ class Social < ApplicationRecord
       opts[:facebook_id] = body['id']
     end
 
+    if body['type'] == 'google'
+      opts[:google_id] = body['id']
+    end
+
     social = Social.find_or_initialize_by(opts)
 
     social.meta ||= {}
@@ -53,7 +57,12 @@ class Social < ApplicationRecord
 
     if body['type'] == 'facebook'
       social.meta['facebook'] = body
-      social.facebook_id ||= body['id']
+      # social.facebook_id ||= body['id']
+    end
+
+    if body['type'] == 'google'
+      social.meta['google'] = body
+      # social.facebook_id ||= body['id']
     end
 
     social.clean_station_and_people(body) 

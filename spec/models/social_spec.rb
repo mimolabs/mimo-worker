@@ -61,6 +61,7 @@ RSpec.describe Social, type: :model do
         expect(s.location_id).to eq 123
         expect(s.person_id).to eq 1
         expect(s.email).to eq 'jenny@me.com'
+        expect(s.facebook_id).to eq 'my-id'
         expect(s.meta['facebook']['link']).to eq 'https://www.facebook.com/app_scoped_user_id/xxx/'
       end
 
@@ -102,8 +103,24 @@ RSpec.describe Social, type: :model do
     end
 
     describe 'Google' do
+      it 'should save google auth deets to a social' do
+        body = {"kind"=>"plus#person", "gender"=>"male", "objectType"=>"person", "id"=>"xxx", "displayName"=>"Simon Morley", "name"=>{"familyName"=>"Morley", "givenName"=>"Simon"}, "url"=>"https://plus.google.com/+SimonMorleyPS", "image"=>{"url"=>"https://lh3.googleusercontent.com/-tsh7P_FCm0s/AAAAAAAAAAI/AAAAAAAAAn8/zO5aofMYpYU/photo.jpg?sz=50", "isDefault"=>false}, "organizations"=>[{"name"=>"King's College London", "title"=>"Mechanical Engineering", "type"=>"school", "endDate"=>"2003", "primary"=>false}, {"name"=>"PolkaSpots Supafly Wi-Fi", "title"=>"CEO", "type"=>"work", "primary"=>true}], "placesLived"=>[{"value"=>"London", "primary"=>true}], "isPlusUser"=>true, "circledByCount"=>69, "verified"=>false}
 
+        client_mac = mac
+        p = Person.create client_mac: client_mac
 
+        body['location_id']   = 123
+        body['client_mac']    = client_mac
+        body['person_id']     = p.id
+        body['type']          = 'google'
+
+        Social.create_social(body)
+        s = Social.last
+        expect(s.location_id).to eq 123
+        expect(s.person_id).to eq p.id
+        expect(s.google_id).to eq 'xxx'
+        expect(s.meta['google']['url']).to eq "https://plus.google.com/+SimonMorleyPS"
+      end
     end
   end
 
