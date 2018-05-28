@@ -12,9 +12,37 @@ RSpec.describe Social, type: :model do
       Station.destroy_all
     end
 
+    describe "processing socials and creating records" do
+      it 'should create a facebooker' do
+        body = {"id"=>"my-id", "name"=>"Jenny The Cat", "email"=>"jenny@me.com", "link"=>"https://www.facebook.com/app_scoped_user_id/xxx/", "first_name"=>"Jenny", "last_name"=>"Cat", "gender"=>"mixed"}
+        
+        stub_request(:get, "https://graph.facebook.com/me/?access_token=secret&fields=id,name,email,link,first_name,last_name,gender").
+         with(
+           headers: {
+          'Accept'=>'*/*',
+          'Accept-Encoding'=>'gzip;q=1.0,deflate;q=0.6,identity;q=0.3',
+          'User-Agent'=>'Faraday v0.15.1'
+           }).
+         to_return(status: 200, body: body.to_json, headers: {})
+
+
+        body = { social_type: 'fb', token: 'secret' } 
+        body[:location_id]   = 123
+        body[:person_id]     = 1
+
+        s = Social.fetch(body)
+        expect(s).to eq true
+
+        s = Social.last
+        expect(s.location_id).to eq 123
+        expect(s.person_id).to eq 1
+        expect(s.email).to eq 'jenny@me.com'
+      end
+    end
+
     describe 'Facebook' do
       it 'should fetch the social details from facebook' do
-        s = Social.new location_id: 100
+        Social.new location_id: 100
 
         body = {"id"=>"my-id", "name"=>"Jenny The Cat", "email"=>"jenny@me.com", "link"=>"https://www.facebook.com/app_scoped_user_id/xxx/", "first_name"=>"Jenny", "last_name"=>"Cat", "gender"=>"mixed"}
 
@@ -35,7 +63,7 @@ RSpec.describe Social, type: :model do
               location_id: 100
             }
 
-        auth = s.fetch_facebook(opts)
+        auth = Social.fetch_facebook(opts)
         expect(auth['id']).to eq 'my-id'
         expect(auth['location_id']).to eq 100
         expect(auth['client_mac']).to eq 'mac'

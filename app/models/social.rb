@@ -12,8 +12,21 @@ class Social < ApplicationRecord
   #
   # Current only Facebook, Google and Twitter are supported.
 
-  def fetch(opts)
+  def self.fetch(opts)
+    details = fetch_details(opts)
+    return unless details
+    create_social(details)
+  end
 
+  def self.fetch_details(opts)
+    case opts[:social_type]
+    when 'tw'
+      Social.fetch_twitter(opts)
+    when 'fb'
+      Social.fetch_facebook(opts)
+    when 'google'
+      Social.fetch_google(opts)
+    end
   end
 
   ##
@@ -24,12 +37,55 @@ class Social < ApplicationRecord
   # It's possible to test this by getting a Facebook Access Token from the
   # graph explorer. Add to the opts as :token. Should return the requested details from Facebook. Don't ask for too many permissions and be explicit with your users.
 
-  def fetch_facebook(opts)
+  def self.fetch_facebook(opts)
     params = {
       'accessToken' => opts[:token]
     }
 
     details = Facebook.fetch(params)
+    return unless details.present?
+
+    details["location_id"]  = opts[:location_id]
+    details['client_mac']   = opts[:client_mac]
+    details['newsletter']   = opts[:newsletter]
+    details['person_id']    = opts[:person_id]
+
+    return details
+  end
+
+  ##
+  # Will fetch the details from Twitter
+  #
+  # Returns an object which is used to create / update the social record
+  #
+  # Requires the twitter env vars to be set. Needs the :screen_name parameter in the opts 
+  # in order to fetch the profile
+  
+  def self.fetch_twitter(opts)
+    details = Twitter.fetch(opts)
+    return unless details.present?
+
+    details["location_id"]  = opts[:location_id]
+    details['client_mac']   = opts[:client_mac]
+    details['newsletter']   = opts[:newsletter]
+    details['person_id']    = opts[:person_id]
+
+    return details
+  end
+
+  ##
+  # Will fetch the details from Google
+  #
+  # Returns an object which is used to create / update the social record
+  #
+  
+  def self.fetch_google(opts)
+    opts = {
+      token: auth[:token],
+    }
+
+    details = Google.fetch(opts)
+    return unless details.present?
 
     details["location_id"]  = opts[:location_id]
     details['client_mac']   = opts[:client_mac]
@@ -93,11 +149,10 @@ class Social < ApplicationRecord
   # We merge the details in, remove the old person and update station.
 
   def clean_station_and_people(body)
-    if person_id && (person_id != body['person_id'])
-      s = Station.find_by(person_id: body['person_id'])
-      s.update_columns person_id: person_id if s.present?
-      Person.find_by(id: body['person_id']).destroy
-    end
+    return if !person_id || (person_id == body['person_id'])
+    s = Station.find_by(person_id: body['person_id'])
+    s.update_columns person_id: person_id if s.present?
+    Person.find_by(id: body['person_id']).destroy
   end
 
   private
@@ -105,6 +160,8 @@ class Social < ApplicationRecord
   ##
   # Updates the person so we have the icons and email etc
   #
+  # Nice for the list of people if we know who's logged in with what etc.
+  # Also helps the first name / last name confusion.
 
   def update_person
     person = Person.find_by(id: person_id)
