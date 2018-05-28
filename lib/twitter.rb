@@ -17,8 +17,6 @@ module Twitter
     return unless bearer
     url = "https://api.twitter.com/1.1/users/show.json\?screen_name=#{auth[:screen_name]}"
     resp = Faraday.new(url: url).get do |req|
-      req.options.timeout           = 3
-      req.options.open_timeout      = 2
       req.headers['Authorization']  = "Bearer #{bearer}"
       req.headers['Content-Type'] = 'application/json'
     end
@@ -36,8 +34,6 @@ module Twitter
 
     url = 'https://api.twitter.com/oauth2/token'
     resp = Faraday.new(url: url).post do |req|
-      req.options.timeout           = 3
-      req.options.open_timeout      = 2
       req.headers['Authorization']  = "Basic #{credentials}"
       req.headers['Content-Type'] = 'application/x-www-form-urlencoded'
       req.body = URI.encode_www_form({ grant_type: 'client_credentials' })
@@ -45,7 +41,7 @@ module Twitter
     case resp.status
     when 200
       body = JSON.parse(resp.body)
-      return body['access_token']
+      body['access_token']
     end
   end
 

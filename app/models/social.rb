@@ -50,6 +50,10 @@ class Social < ApplicationRecord
       opts[:google_id] = body['id']
     end
 
+    if body['type'] == 'twitter'
+      opts[:twitter_id] = body['id_str']
+    end
+
     social = Social.find_or_initialize_by(opts)
 
     social.meta ||= {}
@@ -61,6 +65,10 @@ class Social < ApplicationRecord
 
     if body['type'] == 'google'
       social.meta['google'] = body
+    end
+
+    if body['type'] == 'twitter'
+      social.meta['twitter'] = body
     end
 
     social.clean_station_and_people(body) 

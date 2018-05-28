@@ -122,6 +122,28 @@ RSpec.describe Social, type: :model do
         expect(s.meta['google']['url']).to eq "https://plus.google.com/+SimonMorleyPS"
       end
     end
+
+    describe 'Twitter' do
+      it 'should save twitter auth deets to a social' do
+        
+        body = {"id"=>2244994945, "id_str"=>"2244994945", "name"=>"Twitter Dev", "screen_name"=>"TwitterDev", "location"=>"Internet", "profile_location"=>nil, "description"=>"Your official source for Twitter Platform news, updates & events. Need technical help? Visit https://t.co/mGHnxZU8c1 ⌨️ #TapIntoTwitter", "url"=>"https://t.co/FGl7VOULyL"}
+
+        client_mac = mac
+        p = Person.create client_mac: client_mac
+
+        body['location_id']   = 123
+        body['client_mac']    = client_mac
+        body['person_id']     = p.id
+        body['type']          = 'twitter'
+
+        Social.create_social(body)
+        s = Social.last
+        expect(s.location_id).to eq 123
+        expect(s.person_id).to eq p.id
+        expect(s.twitter_id).to eq '2244994945'
+        expect(s.meta['twitter']['url']).to eq "https://t.co/FGl7VOULyL"
+      end
+    end
   end
 
   describe 'general creation of socials' do
