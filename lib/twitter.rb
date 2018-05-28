@@ -12,7 +12,7 @@ module Twitter
   # Returns a hash of the person
 
   def self.fetch(auth)
-    return {} unless twitter_creds
+    return {} unless twitter_creds?
     bearer = get_twitter_bearer
     return unless bearer
     url = "https://api.twitter.com/1.1/users/show.json\?screen_name=#{auth[:screen_name]}"
@@ -49,7 +49,7 @@ module Twitter
     end
   end
 
-  def twitter_creds
+  def self.twitter_creds?
     ENV['TWITTER_CONSUMER_KEY'] && ENV['TWITTER_CONSUMER_SECRET']
   end
 end
