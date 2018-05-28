@@ -4,7 +4,8 @@
 class Social < ApplicationRecord
 
   include Facebook
-  # after_update :update_person
+  after_create :update_person
+  after_update :update_person
 
   ##
   # Fetch the social profile from the designated provider
@@ -61,10 +62,14 @@ class Social < ApplicationRecord
 
     if body['type'] == 'facebook'
       social.meta['facebook'] = body
+      social.first_name ||= body['first_name']
+      social.last_name  ||= body['last_name']
     end
 
     if body['type'] == 'google'
       social.meta['google'] = body
+      social.first_name ||= body['name']['givenName']
+      social.last_name  ||= body['name']['familyName']
     end
 
     if body['type'] == 'twitter'
@@ -73,6 +78,9 @@ class Social < ApplicationRecord
 
     social.clean_station_and_people(body) 
     social.person_id = body['person_id']
+
+    ### Increment the checkins
+    social.new_record? ? (social.checkins = 1) : (social.checkins += 1)
 
     social.save
   end
@@ -90,6 +98,31 @@ class Social < ApplicationRecord
       s.update_columns person_id: person_id if s.present?
       Person.find_by(id: body['person_id']).destroy
     end
+  end
+
+  private
+
+  ##
+  # Updates the person so we have the icons and email etc
+  #
+
+  def update_person
+    person = Person.find_by(id: person_id)
+    return unless person
+
+    # person.username ||= "#{firstName.to_s} #{lastName.to_s}"
+    person.email ||= email if email.present?
+    if person.first_name.blank? || person.first_name == 'Splash'
+      person.first_name = first_name
+    end
+    if person.last_name.blank? || person.last_name == 'User'
+      person.last_name = last_name
+    end
+
+    person.facebook = true if facebook_id
+    person.google   = true if google_id
+    person.twitter  = true if twitter_id
+    person.save
   end
 
 end

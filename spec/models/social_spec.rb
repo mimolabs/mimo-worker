@@ -63,6 +63,9 @@ RSpec.describe Social, type: :model do
         expect(s.email).to eq 'jenny@me.com'
         expect(s.facebook_id).to eq 'my-id'
         expect(s.meta['facebook']['link']).to eq 'https://www.facebook.com/app_scoped_user_id/xxx/'
+
+        expect(s.first_name).to eq 'Jenny'
+        expect(s.last_name).to eq 'Cat'
       end
 
       ## Checks in via fb on one device
@@ -120,13 +123,16 @@ RSpec.describe Social, type: :model do
         expect(s.person_id).to eq p.id
         expect(s.google_id).to eq 'xxx'
         expect(s.meta['google']['url']).to eq "https://plus.google.com/+SimonMorleyPS"
+        
+        expect(s.first_name).to eq 'Simon'
+        expect(s.last_name).to eq 'Morley'
       end
     end
 
     describe 'Twitter' do
       it 'should save twitter auth deets to a social' do
         
-        body = {"id"=>2244994945, "id_str"=>"2244994945", "name"=>"Twitter Dev", "screen_name"=>"TwitterDev", "location"=>"Internet", "profile_location"=>nil, "description"=>"Your official source for Twitter Platform news, updates & events. Need technical help? Visit https://t.co/mGHnxZU8c1 ⌨️ #TapIntoTwitter", "url"=>"https://t.co/FGl7VOULyL"}
+        body = {"id"=>2244994945, "id_str"=>"2244994945", "name"=>"Twitter Dev", "screen_name"=>"TwitterDev", "location"=>"Internet", "profile_location"=>nil, "description"=>"Your official source for Twitter Platform news, updates & events. Need technical help? Visit https://t.co/mGHnxZU8c1 TapIntoTwitter", "url"=>"https://t.co/FGl7VOULyL"}
 
         client_mac = mac
         p = Person.create client_mac: client_mac
@@ -142,6 +148,11 @@ RSpec.describe Social, type: :model do
         expect(s.person_id).to eq p.id
         expect(s.twitter_id).to eq '2244994945'
         expect(s.meta['twitter']['url']).to eq "https://t.co/FGl7VOULyL"
+        expect(s.checkins).to eq 1
+
+        ### Checkins should be incremented
+        Social.create_social(body)
+        expect(s.reload.checkins).to eq 2
       end
     end
   end
@@ -150,6 +161,22 @@ RSpec.describe Social, type: :model do
 
     it 'should update a person after saving' do
 
+      body = {"id"=>"my-id", "name"=>"Jenny The Cat", "email"=>"jenny@me.com", "link"=>"https://www.facebook.com/app_scoped_user_id/xxx/", "first_name"=>"Jenny", "last_name"=>"Cat", "gender"=>"mixed"}
+
+      client_mac = mac
+      p = Person.create client_mac: client_mac
+
+      body['location_id']   = 123
+      body['client_mac']    = client_mac
+      body['person_id']     = p.id
+      body['type']          = 'facebook'
+
+      Social.create_social(body)
+
+      expect(p.reload.email).to eq 'jenny@me.com'
+      expect(p.first_name).to eq 'Jenny'
+      expect(p.last_name).to eq 'Cat'
+      expect(p.facebook).to eq true
     end
 
   end
