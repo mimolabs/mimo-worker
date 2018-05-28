@@ -1,4 +1,12 @@
+##
+## The Twilio module provides a way to interact with the Twilio API. Mostly used for OTP requests.
+#
+# It requires the twilio env vars are set. See docs for further information.
+
 module Twilio
+
+  ##
+  # Sends the One Time Password (OTP) to a user and logs the request in an EventLog
 
   def self.send_otp(opts)
     splash = SplashPage.find_by id: opts['splash_id']
@@ -17,6 +25,7 @@ module Twilio
       "From" => opts['from'],
       "Body" => body
     }
+
     conn = Faraday.new(:url => "#{url}") do |faraday|
       faraday.request  :url_encoded             # form-encode POST params
       faraday.adapter  Faraday.default_adapter  # make requests with Net::HTTP
@@ -26,10 +35,22 @@ module Twilio
       req.body = body
     end
 
-    # log_otp(response,opts)
+    log_otp(response,opts)
     return true
-  # rescue
-  #   puts response.inspect
-  #   return false
+  rescue => e
+    ### Should log
+    puts e
+    false
+  end
+
+  ## Logs the request from Twilio as an event log
+
+  def self.log_otp(response, opts)
+    e = EventLog.new
+    e.location_id = opts['location_id']
+    e.event_type = 'otp'
+    e.response = response.body
+    e.data = opts.to_json
+    e.save
   end
 end

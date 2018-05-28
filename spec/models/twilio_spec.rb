@@ -7,7 +7,7 @@ RSpec.describe Twilio, type: :model do
       expect(Twilio.send_otp(opts)).to eq false
 
       s = SplashPage.create 
-      opts = { 'number': '+4477777777777777', code: 'xxxxx', 'splash_id' => s.id }
+      opts = { 'number': '+4477777777777777', code: 'xxxxx', 'splash_id' => s.id, 'location_id' => 123 }
 
       expect(Twilio.send_otp(opts)).to eq false
 
@@ -21,10 +21,16 @@ RSpec.describe Twilio, type: :model do
             'Content-Type'=>'application/x-www-form-urlencoded',
             'User-Agent'=>'Faraday v0.15.1'
           }).
-          to_return(status: 200, body: "", headers: {})
+          to_return(status: 200, body: { eggs: 123 }.to_json, headers: {})
 
       s.update twilio_user: 'simon', twilio_pass: 'morley', twilio_from: '+44mynumberhere'
       expect(Twilio.send_otp(opts)).to eq true
+
+      s = EventLog.last
+      expect(s.event_type).to eq 'otp'
+      expect(s.location_id).to eq 123
+      expect(s.response).to be_present
+      expect(s.data).to be_present
     end
   end
 end
