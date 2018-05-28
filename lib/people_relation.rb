@@ -1,9 +1,18 @@
+##
+## The PeopleRelation module creates the linked models including socials, emails, stations etc.
+## It's called whenever someone successfully logs in. 
+
 module PeopleRelation
+
+  ##
+  # Returns a potential username by stripping the email out.
 
   def self.stripped_email(email)
     email.split('@')[0].gsub(/[-_.]/, ' ').gsub(/[0-9]|[^\w\s]/, '')
   end
 
+  ##
+  # Creates a username from an email. If no interesting name is available, it returns 'Splash User'
   def self.create_username(email)
     return 'Splash User' unless email.present?
 
@@ -11,6 +20,12 @@ module PeopleRelation
     return stripped if stripped.length >= 5
     'Splash User'
   end
+
+  ##
+  # This creates all the relations between people, socials, emails, stations.
+  # 
+  # It also creates the timeline events for the login and the terms and conditions.
+  #
 
   def self.record(opts)
 
@@ -78,16 +93,10 @@ module PeopleRelation
       opts[:sms_number] = number 
     end
 
+    ### Record the social = fetches from FB
     if opts[:social_type].present?
-      Social.last
-      # opts[:type] = opts[:social_type]
-      # Social.process_fetch(opts)
-      # unless [true, 'true'].include?(opts[:consent]['email'])
-      #   social = Social.where(location_id: opts[:location_id], person_id: opts[:person_id]).order(updated_at: :asc).last
-      #   if social.present?
-      #     social.update email: nil
-      #   end
-      # end
+      opts[:type] = opts[:social_type]
+      Social.fetch(opts)
     end
 
     ### records the terms agreed timeline event 
