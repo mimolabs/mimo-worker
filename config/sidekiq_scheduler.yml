@@ -1,0 +1,9 @@
+wipe_old_event_logs:
+  cron: '0 0 6 * * *'
+  class: WipeEventLogs
+  description: 'This job removes old event logs'
+
+import_devices:
+  cron: '0 */5 * ? * *'
+  class: ImportDevices
+  description: 'This job imports all the devices from the controllers'

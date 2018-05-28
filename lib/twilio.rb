@@ -38,8 +38,7 @@ module Twilio
     log_otp(response,opts)
     return true
   rescue => e
-    ### Should log
-    puts e
+    log_otp({},opts)
     false
   end
 

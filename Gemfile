@@ -11,8 +11,8 @@ gem 'redis', '~> 4.0'
 
 gem 'bootsnap', '>= 1.1.0', require: false
 
-# mimo gems
 gem 'sidekiq'
+gem 'sidekiq-scheduler'#, '~> 1'
 gem 'faraday'
 gem 'createsend'
 gem 'sdoc'
