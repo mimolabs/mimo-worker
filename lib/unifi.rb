@@ -66,6 +66,10 @@ module Unifi
     end
   end
 
+  def unifi_import_stats
+
+  end
+
   ## 
   # Creates a POST request against the UniFi controller and returns the response body.
   # It requires the cookes which are set using unifi_get_credentials
