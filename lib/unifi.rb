@@ -22,25 +22,33 @@ module Unifi
     end
   end
 
-  # def import_unifi_boxes
-  #   puts 'Importing UniFi boxes'
-  #   boxes = unifi_fetch_boxes
+  ## 
+  # This retrieves a list of devices from the UniFi controller and imports into the Boxes.
+  # If a new device is detected, it will also email the dashboard owner
 
-  #   return {} unless boxes.present?
+  def import_unifi_boxes
+    puts 'Importing UniFi boxes'
+    boxes = unifi_fetch_boxes
 
-  #   success = 0
-  #   failed = []
+    return {} unless boxes.present?
 
-  #   boxes.each do |box|
-  #     mac = Helpers.clean_mac box['mac']
-  #     puts "Importing #{mac}"
-  #     n = process_import_boxes(box, 'unifi')
-  #     n.save ? (success += 1) : (failed << mac)
-  #   end
+    success = 0
+    failed = []
 
-  #   obj =  { success: success, failed: failed }
-  #   return obj
-  # end
+    boxes.each do |box|
+      mac = Helpers.clean_mac box['mac']
+      puts "Importing #{mac}"
+      n = process_import_boxes(box, 'unifi')
+      n.save ? (success += 1) : (failed << mac)
+    end
+
+    obj =  { success: success, failed: failed }
+    notify_new_devices('unifi', obj)
+    return obj
+  end
+
+  ##
+  # Retrieves a list of devices from the UniFi controller.
 
   def unifi_fetch_boxes
     cookies = unifi_get_credentials
@@ -100,4 +108,34 @@ module Unifi
 
     return obj
   end
+  
+  ##
+  # Creates a GET request against the UniFi controller and returns the response body.
+  # Requires the cookies to be set using the unifi_get_credentials function
+
+  def get_unifi(path, opts={}, cookies=nil)
+    conn = Faraday.new(
+      url: host + "/api#{path}",
+      ssl: { verify: false },
+      request: { timeout: 10, open_timeout: 10 }
+    )
+    response = conn.get do |req|
+      req.body                      = opts.to_json if opts.present?
+      req.headers['Content-Type']   = 'application/json'
+      if cookies.present?
+        req.headers['cookie']         = cookies["raw"]
+        req.headers['csrf_token']     = cookies["csrf_token"]
+      end
+      req.options.timeout           = 10
+      req.options.open_timeout      = 10
+    end
+    # log(response, opts)
+    return response
+
+  rescue => e
+    Rails.logger.info e
+    # log({status: 0}, opts)
+    false
+  end
+
 end
