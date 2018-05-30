@@ -95,15 +95,15 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = :smtp
 
-  mimo_config = YAML.safe_load(ERB.new(File.read('config/mimo-config.yml')).result)
+  # mimo_config = YAML.safe_load(ERB.new(File.read('config/mimo-config.yml')).result)
 
   config.action_mailer.smtp_settings = {
-    address:                mimo_config['mailer']['address'],
-    port:                   mimo_config['mailer']['port'],
-    domain:                 mimo_config['mailer']['domain'],
-    user_name:              mimo_config['mailer']['username'],
-    password:               mimo_config['mailer']['password'],
-    authentication:         mimo_config['mailer']['auth'] || 'plain',
-    enable_starttls_auto:   mimo_config['mailer']['tls']  || true 
+    address:                ENV['MIMO_SMTP_HOST'],
+    port:                   ENV['MIMO_SMTP_PORT'],
+    domain:                 ENV['MIMO_SMTP_DOMAIN'],
+    user_name:              ENV['MIMO_SMTP_USER'],
+    password:               ENV['MIMO_SMTP_PASS'],
+    authentication:         ENV['MIMO_SMTP_AUTH'] || 'plain',
+    enable_starttls_auto:   ENV['MIMO_SMTP_TLS']  || true
   }
 end
