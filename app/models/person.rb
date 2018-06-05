@@ -1,3 +1,93 @@
 class Person < ApplicationRecord
 
+  def self.demo_location
+    10_000
+  end
+
+  def create_demo_data
+
+  end
+
+  def create_station
+    station = Station.create(
+      location_id:  Person.demo_location, 
+      person_id:    id,
+      client_mac:   client_mac
+    )
+    station
+  end
+
+  def self.create_person
+    sign_in_time = Time.now - rand(60 * 60 * 24).seconds
+    person = Person.create(
+      location_id: Person.demo_location, 
+      login_count: 1, 
+      created_at: sign_in_time,
+      last_seen: sign_in_time,
+      first_name: 'Demo',
+      last_name: 'User',
+      client_mac: generate_mac
+    )
+    person
+  end
+
+  def create_email
+    email = Faker::Internet.email
+    Email.create person_id: id, location_id: Person.demo_location, email: email, consented: [true, false].sample
+    email
+  end
+  
+  def create_sms
+    Sms.create(
+      location_id: Person.demo_location, 
+      person_id: id, client_mac: client_mac, 
+      number: '+44 7' + (100_000_000 + rand(899999999)).to_s
+    )
+  end
+
+  ### Think we need to refactor this for the new metadata approach towards storing customer data
+  def create_social
+    first_name = Faker::Name.first_name
+    last_name = Faker::Name.last_name
+
+    social = Social.create(
+      location_id: Person.demo_location,
+      person_id: id,
+      first_name: first_name,
+      last_name: last_name,
+      email: Faker::Internet.email
+    )
+    social
+  end
+
+  def random_data
+    dip = rand(8)
+    if dip < 4
+      self.update email: create_email
+    elsif dip > 4
+      social = create_social
+      self.update first_name: social.first_name, last_name: social.last_name, email: social.email
+    elsif dip == 4
+      # create_sms(id.to_s, 1000, station.client_mac)
+    end
+  end
+
+  def self.generate_mac
+    (1..6).map{"%0.2X"%rand(256)}.join("-")
+  end
+
+  def self.create_new_demo_people
+    location = Location.find_or_initialize_by id: Person.demo_location ### it's a starting point
+    (rand(80) + 20).times do
+      person = create_person
+      person.create_station
+      person.random_data
+
+      person.save
+    end
+
+    return unless location.new_record?
+    location.update location_name: 'Demo Location'
+  end
+
 end
