@@ -1,11 +1,17 @@
 class Person < ApplicationRecord
 
-  def self.demo_location
-    10_000
+  has_many :emails, dependent: :destroy
+  has_many :socials, dependent: :destroy
+  has_many :sms, dependent: :destroy
+
+  def self.create_demo_data
+    create_new_demo_people
+    update_existing_demo_data
+    delete_old_demo_data
   end
 
-  def create_demo_data
-
+  def self.demo_location
+    10_000
   end
 
   def create_station
@@ -90,4 +96,18 @@ class Person < ApplicationRecord
     location.update location_name: 'Demo Location'
   end
 
+  def self.update_existing_demo_data
+    people_count = Person.where(location_id: demo_location).size
+    return unless people_count > 20
+
+    (rand(20)).times do
+      person = Person.where(location_id: demo_location).sample
+      new_count = person.login_count + (rand(4) + 1)
+      person.update last_seen: Time.now - rand(60 * 60 * 24).seconds, login_count: new_count
+    end
+  end
+
+  def self.delete_old_demo_data
+    Person.where('location_id =? AND last_seen <=?', demo_location, (Time.now - 90.days)).destroy_all
+  end
 end
