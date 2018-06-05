@@ -32,6 +32,14 @@ module PeopleRelation
     ### Convert Sidekiq hash of strings to symbols because it's easier
     opts = opts.inject({}) { |memo,(k,v)| memo[k.to_sym] = v; memo }
 
+    ### Disable demo flag on location
+    pp = Person.where(location_id: opts[:location_id]).first
+    unless pp.present?
+      ### Send owner a message to say their first person connected ###
+      l = Location.where(id: opts[:location_id], demo: true).first
+      l.update(demo: false) if l.present?
+    end
+
     ### Initialize a station
     station = Station.find_or_initialize_by(
       location_id: opts[:location_id], 
