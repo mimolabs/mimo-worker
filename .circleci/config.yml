@@ -46,7 +46,7 @@ jobs:
           name: Set up DB
           command: |
             touch ~/myapp/config/mimo-config.yml
-            psql mimo_api_test < ~/myapp/db/structure.sql
+            psql -h 127.0.0.1 -p 5432 mimo_api_test < ~/myapp/db/structure.sql
 
       - run: |
           bundle exec rspec
