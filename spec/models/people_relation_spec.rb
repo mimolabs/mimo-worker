@@ -13,7 +13,7 @@ RSpec.describe PeopleRelation, type: :model do
       Sms.destroy_all
     end
 
-    fit 'should create a station for a login' do
+    it 'should create a station for a login' do
       client_mac = mac
       t = (Time.now - 10.days).to_i
       s = SplashPage.create location_id: 100
@@ -83,7 +83,7 @@ RSpec.describe PeopleRelation, type: :model do
       expect(sms.reload.person_id).to eq person.id
     end
 
-    fit 'should not create terms timeline - not consent' do
+    it 'should not create terms timeline - not consent' do
       t = (Time.now - 10.days).to_i
       s = SplashPage.create location_id: 100
       email = 'simon.morley@egg.com'
@@ -103,7 +103,7 @@ RSpec.describe PeopleRelation, type: :model do
       expect(pt).to eq nil
     end
 
-    fit 'should mark as consented - external email' do
+    it 'should mark as consented - external email' do
       t = (Time.now - 10.days).to_i
       s = SplashPage.create location_id: 100
       email = 'simon.morley@egg.com'
@@ -123,7 +123,7 @@ RSpec.describe PeopleRelation, type: :model do
       expect(person.consented).to eq true
     end
 
-    fit 'should mark as consented - doi disabled' do
+    it 'should mark as consented - doi disabled' do
       t = (Time.now - 10.days).to_i
       s = SplashPage.create location_id: 100
       email = 'simon.morley@egg.com'

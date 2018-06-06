@@ -78,7 +78,7 @@ RSpec.describe Unifi, type: :model do
             'Content-Type'=>'application/json',
             'Cookie'=>'csrf_token=oJ63k2Ol84ZrjEQg8KuMZYFjvgrdFnl3; Path=/; Secure, unifises=e4JCiThbp4rocuwYIr6TZo3b1yC7hTFU; Path=/; Secure; HttpOnly',
             'Csrf-Token'=>'oJ63k2Ol84ZrjEQg8KuMZYFjvgrdFnl3',
-            'User-Agent'=>'Faraday v0.15.2'
+            'User-Agent'=>'Faraday v0.15.1'
           }).
           to_return(status: 200, body: device_body.to_json, headers: {})
 
@@ -87,7 +87,7 @@ RSpec.describe Unifi, type: :model do
 
     end
 
-    fit 'should fetch and import the boxes' do
+    it 'should fetch and import the boxes' do
       s = SplashIntegration.create username: @username, password: @password, host: @hostname, location_id: 123
 
       stub_request(:get, "https://1.2.3.4:8443/api/s/default/stat/device").
@@ -98,7 +98,7 @@ RSpec.describe Unifi, type: :model do
             'Content-Type'=>'application/json',
             'Cookie'=>'csrf_token=oJ63k2Ol84ZrjEQg8KuMZYFjvgrdFnl3; Path=/; Secure, unifises=e4JCiThbp4rocuwYIr6TZo3b1yC7hTFU; Path=/; Secure; HttpOnly',
             'Csrf-Token'=>'oJ63k2Ol84ZrjEQg8KuMZYFjvgrdFnl3',
-            'User-Agent'=>'Faraday v0.15.2'
+            'User-Agent'=>'Faraday v0.15.1'
           }).
           to_return(status: 200, body: device_body.to_json, headers: {})
 

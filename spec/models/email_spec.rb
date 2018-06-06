@@ -4,7 +4,7 @@ RSpec.describe Email, type: :model do
 
   describe 'general creation stuff' do
 
-    fit 'should create the email with the right params' do
+    it 'should create the email with the right params' do
       Email.destroy_all
 
       e = Faker::Internet.email
@@ -28,7 +28,7 @@ RSpec.describe Email, type: :model do
       expect { Email.create_record(opts) }.to change { ActionMailer::Base.deliveries.count }.by(0)
     end
 
-    fit 'should confirm the external capture emails' do
+    it 'should confirm the external capture emails' do
       Email.destroy_all
 
       e = Faker::Internet.email
@@ -44,7 +44,7 @@ RSpec.describe Email, type: :model do
       expect(email.consented).to eq true
     end
 
-    fit 'should confirm the email if Double Opt In Disabled' do
+    it 'should confirm the email if Double Opt In Disabled' do
       Email.destroy_all
 
       e = Faker::Internet.email
