@@ -45,7 +45,7 @@ jobs:
       - run: 
           name: Set up DB
           command: |
-            touch ~/myapp/config/mimo-config.yml
+            mv ~/myapp/config/mimo-config.yml.test ~/myapp/config/mimo-config.yml
             psql -h 127.0.0.1 -p 5432 -U postgres mimo_api_test < ~/myapp/db/structure.sql
             ~/myapp/bin/rails db:environment:set RAILS_ENV=test
 
