@@ -46,7 +46,6 @@ jobs:
           name: Set up DB
           command: |
             touch ~/myapp/config/mimo-config.yml
-            psql -c 'create database mimo_api_test;' -U postgres -p 5432 -h 127.0.0.1
             psql -h 127.0.0.1 -p 5432 -U postgres mimo_api_test < ~/myapp/db/structure.sql
 
       - run: |
