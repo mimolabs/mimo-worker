@@ -1,0 +1,73 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/myapp
+    docker:
+      - image: circleci/ruby:2.5.1-node
+        environment:
+          RAILS_ENV: test
+          RACK_ENV: test
+
+      - image: circleci/postgres:9.6.2-alpine
+        environment:
+          POSTGRES_USER: root
+          POSTGRES_DB: circle-test_test
+
+      - image: library/redis:latest
+
+    steps:
+      - checkout
+
+      - restore_cache:
+          name: Restore bundle cache
+          keys:
+            - myapp-bundle-{{ checksum "Gemfile.lock" }}
+            - myapp-bundle-
+
+      - run:
+         name: Install deps
+         command: sudo apt-get update -qq && sudo apt-get install -y build-essential
+
+      - run:
+         name: Bundle Install
+         command: bin/bundle check --path vendor/bundle || bin/bundle install --path vendor/bundle --jobs 4 --retry 3 && mkdir /tmp/workspace #&& cp -r vendor /tmp/workspace/ 2>/dev/null
+
+      - save_cache:
+         name: Store bundle cache
+         key: myapp-bundle-{{ checksum "Gemfile.lock" }}
+         paths:
+           - vendor/bundle
+
+      - run:
+         name: Wait for DB
+         command: dockerize -wait tcp://localhost:5432 -timeout 1m
+
+      - run: 
+          name: Set up DB
+          command: |
+            bundle exec rake db:create db:schema:load --trace
+            bundle exec rake db:migrate
+
+      - run: |
+          bundle exec rspec
+  deploy:
+    working_directory: ~/myapp
+    docker:
+      - image: alpine:latest
+    steps:
+      - run:
+          name: Trigger Docker build
+          command: apk add --no-cache curl && curl -XPOST https://registry.hub.docker.com/u/ohmimo/mimo-api/trigger/${DOCKER_TOKEN}/
+
+workflows:
+  version: 2
+  build-test-and-deploy:
+    jobs:
+      - build
+      - deploy:
+          requires:
+            - build
+          filters:
+            branches:
+              only:
+                - master
