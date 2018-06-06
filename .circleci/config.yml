@@ -46,7 +46,7 @@ jobs:
           name: Set up DB
           command: |
             touch ~/myapp/config/mimo-config.yml
-            psql -h 127.0.0.1 -p 5432 -u postgres mimo_api_test < ~/myapp/db/structure.sql
+            psql -h 127.0.0.1 -p 5432 -U postgres mimo_api_test < ~/myapp/db/structure.sql
 
       - run: |
           bundle exec rspec
@@ -58,7 +58,7 @@ jobs:
     steps:
       - run:
           name: Trigger Docker build
-          command: apk add --no-cache curl && curl -XPOST https://registry.hub.docker.com/u/ohmimo/mimo-api/trigger/${DOCKER_TOKEN}/
+          command: apk add --no-cache curl && curl -XPOST https://registry.hub.docker.com/u/ohmimo/mimo-worker/trigger/${DOCKER_TOKEN}/
 
 workflows:
   version: 2
