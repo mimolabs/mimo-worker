@@ -14,6 +14,8 @@ test:
   <<: *default
   host: <%= ENV['POSTGRES_HOST'] || 'localhost' %>
   port: <%= ENV['POSTGRES_PORT'] || '5432' %>
+  username: <%= ENV['POSTGRES_USER'] || 'mimo-api' %>
+  password: <%= ENV['POSTGRES_PASSWORD'] %>
   database: mimo_api_test
 
 production:
