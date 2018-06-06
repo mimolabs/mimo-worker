@@ -5,6 +5,7 @@ RSpec.describe Email, type: :model do
 
     before(:each) do 
       REDIS.flushall
+      CreateSend::CreateSend.user_agent "eggs"
     end
 
     it "should run subscribe the email to campaign monitor" do
@@ -24,7 +25,7 @@ RSpec.describe Email, type: :model do
           headers: {
             'Authorization'=>'Basic eHh4LXVzNzp4',
             'Content-Type'=>'application/json; charset=utf-8',
-            'User-Agent'=>'createsend-ruby-4.1.2-2.5.1-p57-x86_64-darwin16'
+            'User-Agent'=>'eggs'
           }).
           to_return(status: 200, body: my_email, headers: {})
 
