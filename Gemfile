@@ -13,7 +13,7 @@ gem 'bootsnap', '>= 1.1.0', require: false
 
 gem 'sidekiq'
 gem 'sidekiq-scheduler'#, '~> 1'
-gem 'faraday'
+gem 'faraday', '0.15.2'
 gem 'createsend'
 gem 'sdoc'
 gem 'redis-rails'
