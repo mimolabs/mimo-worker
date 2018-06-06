@@ -25,7 +25,7 @@ class Email < ApplicationRecord
   def send_double_opt_in_email
     code = create_doi_code
 
-    link = MIMO_CONFIG['dashboard']['url']
+    link = ENV['MIMO_DASHBOARD_URL']
     link = "https://#{link}/#/doi/#{id}?code=#{code}"
 
     opts = {
