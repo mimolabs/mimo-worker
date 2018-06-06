@@ -10,6 +10,6 @@ module Helpers
   end
 
   def self.words
-    File.read(File.dirname(__FILE__) + '/..' + "/config/words.txt").split.sample
+    File.read(Rails.root.join('config/words.txt')).split.sample
   end
 end

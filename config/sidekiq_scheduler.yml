@@ -7,3 +7,13 @@ import_devices:
   cron: '0 */5 * ? * *'
   class: ImportDevices
   description: 'This job imports all the devices from the controllers'
+
+generate_demo_data:
+  cron: '0 0 4 * * *'
+  class: GenerateDemoData 
+  description: 'This job generates demo data for the users'
+
+send_daily_splash:
+  cron: '58 06 * * *'
+  class: SendSplashPasswordChanged
+  description: "Changes the password for users on a daily basis"

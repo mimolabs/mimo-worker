@@ -16,4 +16,11 @@ class SplashMailer < ApplicationMailer
     @url         = params[:url]
     mail(to: @email, subject: '[SPLASH] Newsletter Error')
   end
+
+  def daily_password
+    @email = params[:email]
+    @password = params[:password]
+    @location = params[:location_name]
+    mail(to: @email, subject: '[SPLASH] Password Changed')
+  end
 end
