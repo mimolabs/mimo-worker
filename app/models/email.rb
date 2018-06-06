@@ -25,6 +25,8 @@ class Email < ApplicationRecord
   def send_double_opt_in_email
     code = create_doi_code
 
+    return if Rails.env.test?
+
     link = MIMO_CONFIG['dashboard']['url']
     link = "https://#{link}/#/doi/#{id}?code=#{code}"
 

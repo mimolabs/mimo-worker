@@ -95,8 +95,6 @@ Rails.application.configure do
 
   config.action_mailer.delivery_method = :smtp
 
-  # mimo_config = YAML.safe_load(ERB.new(File.read('config/mimo-config.yml')).result)
-
   config.action_mailer.smtp_settings = {
     address:                ENV['MIMO_SMTP_HOST'],
     port:                   ENV['MIMO_SMTP_PORT'],
