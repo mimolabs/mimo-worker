@@ -30,7 +30,7 @@ jobs:
 
       - run:
          name: Bundle Install
-         command: bin/bundle check --path vendor/bundle || bin/bundle install --path vendor/bundle --jobs 4 --retry 3 && mkdir /tmp/workspace #&& cp -r vendor /tmp/workspace/ 2>/dev/null
+         command: bin/bundle check --path vendor/bundle || bin/bundle install --path vendor/bundle --jobs 4 --retry 3 && mkdir /tmp/workspace 
 
       - save_cache:
          name: Store bundle cache
