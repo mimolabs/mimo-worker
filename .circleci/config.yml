@@ -50,6 +50,7 @@ jobs:
 
       - run: |
           bundle exec rspec
+
   deploy:
     working_directory: ~/myapp
     docker:
