@@ -46,8 +46,7 @@ jobs:
           name: Set up DB
           command: |
             touch ~/myapp/config/mimo-config.yml
-            bundle exec rake db:create db:schema:load --trace
-            bundle exec rake db:migrate
+            psql mimo_api_test < ~/myapp/db/structure.sql
 
       - run: |
           bundle exec rspec
