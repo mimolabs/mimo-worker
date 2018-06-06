@@ -45,8 +45,8 @@ jobs:
       - run: 
           name: Set up DB
           command: |
-            mkdir /etc/mimo
-            touch /etc/mimo/mimo-config.yml
+            sudo mkdir /etc/mimo
+            sudo touch /etc/mimo/mimo-config.yml
             bundle exec rake db:create db:schema:load --trace
             bundle exec rake db:migrate
 
