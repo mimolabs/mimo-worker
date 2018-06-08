@@ -6,7 +6,7 @@ RSpec.describe Person, type: :model do
   let(:ap_mac) { (1..6).map{"%0.2X"%rand(256)}.join('-') }
 
   describe 'create demo data in' do
-    
+
     before(:each) do
       Person.destroy_all
       Email.destroy_all
@@ -84,6 +84,26 @@ RSpec.describe Person, type: :model do
       expect(Email.all.size).to eq 0
       expect(Social.all.size).to eq 0
       expect(Sms.all.size).to eq 0
+    end
+  end
+
+  describe 'destroy_relations' do
+    it 'should destroy all the relations' do
+      location_id = 123
+      person = Person.create location_id: location_id
+      Email.create location_id: location_id, person_id: person.id, email: Faker::Internet.email
+      Social.create location_id: location_id, location_ids: [location_id], person_id: person.id
+      Sms.create location_id: location_id, person_id: person.id
+      PersonTimeline.create location_id: location_id, person_id: person.id
+      expect(Email.all.size).to eq 1
+      expect(Social.all.size).to eq 1
+      expect(Sms.all.size).to eq 1
+      expect(PersonTimeline.all.size).to eq 1
+      Person.destroy_relations({'location_id' => location_id, 'person_id' => person.id})
+      expect(Email.all.size).to eq 0
+      expect(Social.all.size).to eq 0
+      expect(Sms.all.size).to eq 0
+      expect(PersonTimeline.all.size).to eq 0
     end
   end
 end

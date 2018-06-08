@@ -4,6 +4,63 @@ class Person < ApplicationRecord
   has_many :socials, dependent: :destroy
   has_many :sms, dependent: :destroy
 
+  def self.destroy_relations(options)
+    return unless options['location_id'].present? && options['person_id'].present?
+
+    Email.where(location_id: options['location_id'], person_id: options['person_id']).destroy_all
+    Social.where(location_id: options['location_id'], person_id: options['person_id']).destroy_all
+    Sms.where(location_id: options['location_id'], person_id: options['person_id']).destroy_all
+    PersonTimeline.where(location_id: options['location_id'], person_id: options['person_id']).destroy_all
+
+    return unless options['portal_request'] && Rails.env.production?
+    notify_deletion(options)
+  end
+  #
+  # def self.notify_deletion(options)
+  #   loc = Location.find_by(id: options['location_id'])
+  #   notify_slack(options, loc)
+  #
+  #   return unless loc && loc.user_id
+  #   user = User.find_by(id: loc.user_id)
+  #   return unless user
+  #
+  #   mailer_opts = {
+  #     to_email: user.try(:email),
+  #     from_email: 'no-way@oh-mimo.com',
+  #     from_name: 'MIMO',
+  #     subject: '[USER DELETED]',
+  #     body: person_delete_body(loc)
+  #   }
+  #   Mailer.send_v2(mailer_opts)
+  # end
+
+  # def self.create_timeline(email)
+  #   people_ids = get_people_ids(email)
+  #   return unless people_ids.present?
+  #   mailer_data = []
+  #   week = 60*60*24*7
+  #   people_ids.each do |person_id|
+  #     code = SecureRandom.hex
+  #     $redis.setex("timelinePortalCode:#{person_id}", week, code)
+  #     mailer_data << {id: person_id, code: code}
+  #   end
+  #   email_opts = compose_email(mailer_data, options)
+  # end
+  #
+  # def self.get_people_ids(email)
+  #   ids = []
+  #   Person.where(email: email).each do |person|
+  #     ids << person.id.to_s
+  #   end
+  #   Email.where(email: email, :person_id.exists => true).each do |e|
+  #     ids << e.person_id if e.person_id.present?
+  #   end
+  #   Social.where(email: email, :person_id.exists => true).each do |s|
+  #     ids << s.person_id if s.person_id.present?
+  #   end
+  #   ids.uniq
+  # end
+
   def self.create_demo_data
     create_new_demo_people
     update_existing_demo_data
@@ -16,7 +73,7 @@ class Person < ApplicationRecord
 
   def create_station
     station = Station.create(
-      location_id:  Person.demo_location, 
+      location_id:  Person.demo_location,
       person_id:    id,
       client_mac:   client_mac
     )
@@ -26,8 +83,8 @@ class Person < ApplicationRecord
   def self.create_person
     sign_in_time = Time.now - rand(60 * 60 * 24).seconds
     person = Person.create(
-      location_id: Person.demo_location, 
-      login_count: 1, 
+      location_id: Person.demo_location,
+      login_count: 1,
       created_at: sign_in_time,
       last_seen: sign_in_time,
       first_name: 'Demo',
@@ -42,11 +99,11 @@ class Person < ApplicationRecord
     Email.create person_id: id, location_id: Person.demo_location, email: email, consented: [true, false].sample
     email
   end
-  
+
   def create_sms
     Sms.create(
-      location_id: Person.demo_location, 
-      person_id: id, client_mac: client_mac, 
+      location_id: Person.demo_location,
+      person_id: id, client_mac: client_mac,
       number: '+44 7' + (100_000_000 + rand(899999999)).to_s
     )
   end
