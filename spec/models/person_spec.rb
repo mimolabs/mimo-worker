@@ -90,7 +90,7 @@ RSpec.describe Person, type: :model do
   end
 
   describe 'destroy_relations' do
-    it 'should destroy all the relations' do
+    it 'should destroy all the relations - no notify' do
       location_id = 123
       person = Person.create location_id: location_id
       Email.create location_id: location_id, person_id: person.id, email: Faker::Internet.email
@@ -101,7 +101,11 @@ RSpec.describe Person, type: :model do
       expect(Social.all.size).to eq 1
       expect(Sms.all.size).to eq 1
       expect(PersonTimeline.all.size).to eq 1
-      Person.destroy_relations({'location_id' => location_id, 'person_id' => person.id})
+      opts = {
+        'location_id' => location_id,
+        'person_id' => person.id
+      }
+      expect {Person.destroy_relations(opts)}.to change { ActionMailer::Base.deliveries.count }.by(0)
       expect(Email.all.size).to eq 0
       expect(Social.all.size).to eq 0
       expect(Sms.all.size).to eq 0
@@ -109,14 +113,15 @@ RSpec.describe Person, type: :model do
     end
 
     it 'should notify location owner if end user request' do
-      allow(PersonDeleteMailer).to receive(:with).and_return(mailer)
-      allow(mailer).to receive(:person_delete_request_email).and_return(email_obj)
-      allow(email_obj).to receive(:deliver_now)
       user = User.create email: Faker::Internet.email
       location = Location.create user_id: user.id, location_name: Faker::Name.first_name
       person = Person.create location_id: location.id
-      expect(PersonDeleteMailer).to receive(:with).with(email: user.email, location_name: location.location_name)
-      Person.destroy_relations({'portal_request' => true, 'location_id' => location.id, 'person_id' => person.id})
+      opts = {
+        'portal_request' => true,
+        'location_id' => location.id,
+        'person_id' => person.id
+      }
+      expect { Person.destroy_relations({'portal_request' => true, 'location_id' => location.id, 'person_id' => person.id}) }.to change { ActionMailer::Base.deliveries.count }.by(1)
     end
   end
 end
