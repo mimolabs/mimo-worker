@@ -35,6 +35,10 @@ class Person < ApplicationRecord
     DataRequestMailer.with(@mailer_opts).delete_request_email.deliver_now
   end
 
+  ##
+  # Creates an access code for an end user to access their data. The link to
+  # the page(s) is emailed to them.
+
   def self.create_portal_links_email(email)
     create_access_codes(get_people_ids(email))
     return unless @mailer_data
