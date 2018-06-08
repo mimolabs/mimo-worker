@@ -31,17 +31,15 @@ class Person < ApplicationRecord
     @mailer_opts = {
       email: user.try(:email),
       location_name: loc.location_name
-      url: "https://#{ENV['MIMO_DASHBOARD_URL']}/#/timeline/"
     }
-    puts @mailer_opts
     DataRequestMailer.with(@mailer_opts).delete_request_email.deliver_now
   end
 
   def self.create_portal_links_email(email)
     create_access_codes(get_people_ids(email))
     return unless @mailer_data
-    @mailer_opts = {email: email, mailer_data: @mailer_data
-                    url: 'https://app.oh-mimo.com/#/'}
+    @mailer_opts = {email: email, mailer_data: @mailer_data,
+                    url: "https://#{ENV['MIMO_DASHBOARD_URL']}/#/timeline/"}
     DataRequestMailer.with(@mailer_opts).access_request_email.deliver_now
   end
 
