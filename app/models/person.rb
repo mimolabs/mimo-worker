@@ -4,6 +4,11 @@ class Person < ApplicationRecord
   has_many :socials, dependent: :destroy
   has_many :sms, dependent: :destroy
 
+  ##
+  # Destroys the relations of a person, including Email, Social, Sms,
+  # PersonTimeline. If the end user has requested the deletion, the location
+  # owner is notified.
+
   def self.destroy_relations(options)
     return unless options['location_id'].present? && options['person_id'].present?
 
@@ -12,27 +17,23 @@ class Person < ApplicationRecord
     Sms.where(location_id: options['location_id'], person_id: options['person_id']).destroy_all
     PersonTimeline.where(location_id: options['location_id'], person_id: options['person_id']).destroy_all
 
-    return unless options['portal_request'] && Rails.env.production?
+    return unless options['portal_request']
     notify_deletion(options)
   end
-  #
-  # def self.notify_deletion(options)
-  #   loc = Location.find_by(id: options['location_id'])
-  #   notify_slack(options, loc)
-  #
-  #   return unless loc && loc.user_id
-  #   user = User.find_by(id: loc.user_id)
-  #   return unless user
-  #
-  #   mailer_opts = {
-  #     to_email: user.try(:email),
-  #     from_email: 'no-way@oh-mimo.com',
-  #     from_name: 'MIMO',
-  #     subject: '[USER DELETED]',
-  #     body: person_delete_body(loc)
-  #   }
-  #   Mailer.send_v2(mailer_opts)
-  # end
+
+  def self.notify_deletion(options)
+    loc = Location.find_by(id: options['location_id'])
+
+    return unless loc && loc.user_id
+    user = User.find_by(id: loc.user_id)
+    return unless user
+
+    mailer_opts = {
+      email: user.try(:email),
+      location_name: loc.location_name
+    }
+    PersonDeleteMailer.with(mailer_opts).person_delete_request_email.deliver_now
+  end
 
   # def self.create_timeline(email)
   #   people_ids = get_people_ids(email)

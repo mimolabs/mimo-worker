@@ -4,6 +4,8 @@ RSpec.describe Person, type: :model do
 
   let(:mac) { (1..6).map{"%0.2X"%rand(256)}.join('-') }
   let(:ap_mac) { (1..6).map{"%0.2X"%rand(256)}.join('-') }
+  let(:mailer) { double('mailer') }
+  let(:email_obj) { double('email_obj') }
 
   describe 'create demo data in' do
 
@@ -104,6 +106,17 @@ RSpec.describe Person, type: :model do
       expect(Social.all.size).to eq 0
       expect(Sms.all.size).to eq 0
       expect(PersonTimeline.all.size).to eq 0
+    end
+
+    it 'should notify location owner if end user request' do
+      allow(PersonDeleteMailer).to receive(:with).and_return(mailer)
+      allow(mailer).to receive(:person_delete_request_email).and_return(email_obj)
+      allow(email_obj).to receive(:deliver_now)
+      user = User.create email: Faker::Internet.email
+      location = Location.create user_id: user.id, location_name: Faker::Name.first_name
+      person = Person.create location_id: location.id
+      expect(PersonDeleteMailer).to receive(:with).with(email: user.email, location_name: location.location_name)
+      Person.destroy_relations({'portal_request' => true, 'location_id' => location.id, 'person_id' => person.id})
     end
   end
 end
