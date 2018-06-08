@@ -89,7 +89,7 @@ RSpec.describe Person, type: :model do
     end
   end
 
-  describe 'destroy_relations' do
+  describe '#destroy_relations' do
     it 'should destroy all the relations - no notify' do
       location_id = 123
       person = Person.create location_id: location_id
@@ -122,6 +122,42 @@ RSpec.describe Person, type: :model do
         'person_id' => person.id
       }
       expect { Person.destroy_relations({'portal_request' => true, 'location_id' => location.id, 'person_id' => person.id}) }.to change { ActionMailer::Base.deliveries.count }.by(1)
+      expect(Person.instance_variable_get(:@mailer_opts)).to eq({email: user.email, location_name: location.location_name})
+    end
+  end
+
+  describe '#create_portal_links_email' do
+    it 'creates a body of ids + codes and saves them all to redis' do
+      ids = [123, 456, 789]
+      Person.create_access_codes(ids)
+      expect(Person.instance_variable_get(:@mailer_data).size).to eq 3
+      expect(Person.instance_variable_get(:@mailer_data)[0][:id]).to eq 123
+      expect(Person.instance_variable_get(:@mailer_data)[1][:id]).to eq 456
+      expect(Person.instance_variable_get(:@mailer_data)[2][:id]).to eq 789
+
+      expect(REDIS.get("timelinePortalCode:#{123}")).not_to eq nil
+      expect(REDIS.get("timelinePortalCode:#{456}")).not_to eq nil
+      expect(REDIS.get("timelinePortalCode:#{789}")).not_to eq nil
+    end
+
+    it 'finds all people associated with an email address' do
+      email_address = Faker::Internet.email
+      person_one = Person.create email: email_address
+      person_two = Person.create
+      person_three = Person.create
+      person_two_email = Email.create email: email_address, person_id: person_two.id
+      person_three_social = Social.create email: email_address, person_id: person_three.id
+      expect(Person.get_people_ids(email_address)).to include person_one.id
+      expect(Person.get_people_ids(email_address)).to include person_two.id
+      expect(Person.get_people_ids(email_address)).to include person_three.id
+    end
+
+    it 'should send off all the right data if there\'s a person associated' do
+      person = Person.create email: Faker::Internet.email
+      expect {Person.create_portal_links_email(person.email)}.to change { ActionMailer::Base.deliveries.count }.by(1)
+      expect(Person.instance_variable_get(:@mailer_data).size).to eq 1
+      expect(Person.instance_variable_get(:@mailer_data)[0][:id]).to eq person.id
+      expect(Person.instance_variable_get(:@mailer_opts)[:email]).to eq person.email
     end
   end
 end

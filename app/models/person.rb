@@ -28,39 +28,46 @@ class Person < ApplicationRecord
     user = User.find_by(id: loc.user_id)
     return unless user
 
-    mailer_opts = {
+    @mailer_opts = {
       email: user.try(:email),
       location_name: loc.location_name
+      url: "https://#{ENV['MIMO_DASHBOARD_URL']}/#/timeline/"
     }
-    PersonDeleteMailer.with(mailer_opts).person_delete_request_email.deliver_now
+    puts @mailer_opts
+    DataRequestMailer.with(@mailer_opts).delete_request_email.deliver_now
   end
 
-  # def self.create_timeline(email)
-  #   people_ids = get_people_ids(email)
-  #   return unless people_ids.present?
-  #   mailer_data = []
-  #   week = 60*60*24*7
-  #   people_ids.each do |person_id|
-  #     code = SecureRandom.hex
-  #     $redis.setex("timelinePortalCode:#{person_id}", week, code)
-  #     mailer_data << {id: person_id, code: code}
-  #   end
-  #   email_opts = compose_email(mailer_data, options)
-  # end
-  #
-  # def self.get_people_ids(email)
-  #   ids = []
-  #   Person.where(email: email).each do |person|
-  #     ids << person.id.to_s
-  #   end
-  #   Email.where(email: email, :person_id.exists => true).each do |e|
-  #     ids << e.person_id if e.person_id.present?
-  #   end
-  #   Social.where(email: email, :person_id.exists => true).each do |s|
-  #     ids << s.person_id if s.person_id.present?
-  #   end
-  #   ids.uniq
-  # end
+  def self.create_portal_links_email(email)
+    create_access_codes(get_people_ids(email))
+    return unless @mailer_data
+    @mailer_opts = {email: email, mailer_data: @mailer_data
+                    url: 'https://app.oh-mimo.com/#/'}
+    DataRequestMailer.with(@mailer_opts).access_request_email.deliver_now
+  end
+
+  def self.create_access_codes(ids)
+    @mailer_data = []
+    week = 60*60*24*7
+    ids.each do |id|
+      code = SecureRandom.hex
+      REDIS.setex("timelinePortalCode:#{id}", week, code)
+      @mailer_data << {id: id, code: code}
+    end
+  end
+
+  def self.get_people_ids(email)
+    ids = []
+    Person.where(email: email).each do |person|
+      ids << person.id
+    end
+    Email.where(email: email).each do |e|
+      ids << e.person_id if e.person_id.present?
+    end
+    Social.where(email: email).each do |s|
+      ids << s.person_id if s.person_id.present?
+    end
+    ids.uniq
+  end
 
   def self.create_demo_data
     create_new_demo_people

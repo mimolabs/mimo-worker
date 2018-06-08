@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+  </head>
+  <body>
+    <p>Please find the data we have associated with your email address at the following link(s):</p>
+    <ul>
+      <% @mailer_data.each do |link| %>
+        <li><%= @url %><%= link[:id] %>?code=<%= link[:code] %></li>
+      <% end %>
+    </ul>
+    <p>Lots of love.</p>
+  </body>
+</html>
