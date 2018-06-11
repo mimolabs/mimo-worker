@@ -1,3 +1,5 @@
+require 'zip'
+
 class Person < ApplicationRecord
 
   has_many :emails, dependent: :destroy
@@ -71,8 +73,62 @@ class Person < ApplicationRecord
     ids.uniq
   end
 
-  def self.download_request(opts)
-    
+  def self.download_person_data(opts)
+    person = Person.find_by(id: opts['person_id'])
+    return unless person
+    csvs = [person_csv(person), emails_csv(opts), social_csv(opts)].compact
+    create_zip(opts, csvs)
+    remove_files(csvs, opts)
+  end
+
+  def self.person_csv(person)
+    file_name = "person_#{person.id}_#{SecureRandom.hex(5)}.csv"
+    CSV.open("/tmp/#{file_name}", 'wb') do |csv|
+      csv << %w(ID Created Last_Seen Login_Count Client_Mac Username Email First_Name Last_Name Facebook Google Twitter)
+      csv << [person.id, person.created_at, person.last_seen, person.login_count, person.client_mac, person.username, person.email, person.first_name, person.last_name, person.facebook, person.google, person.twitter]
+    end
+    file_name
+  end
+
+  def self.emails_csv(opts)
+    emails = Email.where(person_id: opts['person_id'])
+    return unless emails
+    file_name = "emails_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
+    CSV.open("/tmp/#{file_name}", 'wb') do |csv|
+      csv << %w(ID Email Created_At Person_ID List_ID List_Type Added Active Blocked Bounced Spam Unsubscribed Consented Lists)
+      emails.each do |email|
+        csv << [email.id, email.email, email.created_at, email.person_id, email.list_id, email.list_type, email.added, email.active, email.blocked, email.bounced, email.spam, email.unsubscribed, email.consented, email.lists]
+      end
+    end
+    file_name
+  end
+
+  def self.social_csv(opts)
+    social = Social.where(person_id: opts['person_id'])
+    return unless social
+    file_name = "social_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
+    CSV.open("/tmp/#{file_name}", 'wb') do |csv|
+      csv << %w(ID First_Name Last_Name Created_At Updated_At Facebook_ID Google_ID Email Gender Twitter_ID Person_ID Emails Meta)
+      social.each do |soc|
+        csv << [soc.id, soc.first_name, soc.last_name, soc.created_at, soc.updated_at, soc.facebook_id, soc.google_id, soc.email, soc.gender, soc.twitter_id, soc.person_id, soc.emails, soc.meta]
+      end
+    end
+    file_name
+  end
+
+  def self.create_zip(opts, csvs)
+    Zip::File.open("/tmp/person_#{opts['person_id']}.zip", Zip::File::CREATE) do |zip|
+      csvs.each do |csv|
+        zip.add csv, "/tmp/#{csv}"
+      end
+    end
+  end
+
+  def self.remove_files(csvs, opts)
+    File.delete("/tmp/person_#{opts['person_id']}.zip") if File.exist?("/tmp/person_#{opts['person_id']}.zip")
+    csvs.each do |csv|
+      File.delete("/tmp/#{csv}") if File.exist?("/tmp/#{csv}")
+    end
   end
 
   def self.create_demo_data
