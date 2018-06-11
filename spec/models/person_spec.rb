@@ -217,5 +217,22 @@ RSpec.describe Person, type: :model do
       expect(csv[0].size).to eq csv[1].size
       File.delete("/tmp/#{file_name}") if File.exist?("/tmp/#{file_name}")
     end
+
+    it 'creates a file for the sms data' do
+      person = Person.create
+      sms = Sms.create person_id: person.id, number: '+112727337373'
+      second_sms = Sms.create person_id: person.id, number: '+112730007373'
+      file_name = Person.sms_csv('person_id' => person.id)
+      expect(File.file?("/tmp/#{file_name}")).to eq true
+      csv = CSV.read("/tmp/#{file_name}", 'r')
+      expect(csv[0][0]).to eq 'ID'
+      expect(csv[1][0]).to eq sms.id.to_s
+      expect(csv[2][0]).to eq second_sms.id.to_s
+      expect(csv[0][2]).to eq 'Number'
+      expect(csv[1][2]).to eq sms.number
+      expect(csv[2][2]).to eq second_sms.number
+      expect(csv[0].size).to eq csv[1].size
+      File.delete("/tmp/#{file_name}") if File.exist?("/tmp/#{file_name}")
+    end
   end
 end

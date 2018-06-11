@@ -76,8 +76,8 @@ class Person < ApplicationRecord
   def self.download_person_data(opts)
     person = Person.find_by(id: opts['person_id'])
     return unless person
-    csvs = [person_csv(person), emails_csv(opts), social_csv(opts)].compact
-    create_zip(opts, csvs)
+    csvs = [person_csv(person), emails_csv(opts), social_csv(opts), sms_csv(opts)].compact
+    create_zip(csvs, opts)
     remove_files(csvs, opts)
   end
 
@@ -116,7 +116,20 @@ class Person < ApplicationRecord
     file_name
   end
 
-  def self.create_zip(opts, csvs)
+  def self.sms_csv(opts)
+    sms = Sms.where(person_id: opts['person_id'])
+    return unless sms
+    file_name = "sms_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
+    CSV.open("/tmp/#{file_name}", 'wb') do |csv|
+      csv << %w(ID Created_At Number Person_ID)
+      sms.each do |object|
+        csv << [object.id, object.created_at, object.number, object.person_id]
+      end
+    end
+    file_name
+  end
+
+  def self.create_zip(csvs, opts)
     Zip::File.open("/tmp/person_#{opts['person_id']}.zip", Zip::File::CREATE) do |zip|
       csvs.each do |csv|
         zip.add csv, "/tmp/#{csv}"
