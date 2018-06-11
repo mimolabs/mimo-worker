@@ -42,34 +42,35 @@ class Person < ApplicationRecord
   # page(s) is emailed to them.
 
   def self.create_portal_links_email(email)
-    create_access_codes(get_people_ids(email))
-    return unless @mailer_data
-    @mailer_opts = {email: email, mailer_data: @mailer_data,
-                    url: "https://#{ENV['MIMO_DASHBOARD_URL']}/#/timeline/"}
+    mailer_data = create_access_codes(get_people_ids(email))
+    return unless mailer_data
+    @mailer_opts = {
+      email: email,
+      mailer_data: mailer_data,
+      url: "https://#{ENV['MIMO_DASHBOARD_URL']}/#/timeline/"
+    }
     DataRequestMailer.with(@mailer_opts).access_request_email.deliver_now
   end
 
   def self.create_access_codes(ids)
-    @mailer_data = []
+    mailer_data = []
     week = 60*60*24*7
-    ids.each do |id|
-      code = SecureRandom.hex
-      REDIS.setex("timelinePortalCode:#{id}", week, code)
-      @mailer_data << {id: id, code: code}
-    end
+    ids.map {|id| mailer_data << set_timeline_portal_code(week, id)}
+    mailer_data
+  end
+
+  def self.set_timeline_portal_code(week, id)
+    # write a new test for this
+    code = SecureRandom.hex
+    REDIS.setex("timelinePortalCode:#{id}", week, code)
+    {id: id, code: code}
   end
 
   def self.get_people_ids(email)
     ids = []
-    Person.where(email: email).each do |person|
-      ids << person.id
-    end
-    Email.where(email: email).each do |e|
-      ids << e.person_id if e.person_id.present?
-    end
-    Social.where(email: email).each do |s|
-      ids << s.person_id if s.person_id.present?
-    end
+    Person.where(email: email).map {|person| ids << person.id }
+    Email.where(email: email).map {|e| ids << e.person_id if e.person_id.present? }
+    Social.where(email: email).map {|s| ids << s.person_id if s.person_id.present? }
     ids.uniq
   end
 
