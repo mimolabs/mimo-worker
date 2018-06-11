@@ -69,8 +69,8 @@ class Person < ApplicationRecord
   def self.get_people_ids(email)
     ids = []
     Person.where(email: email).map {|person| ids << person.id }
-    Email.where(email: email).map {|e| ids << e.person_id if e.person_id.present? }
-    Social.where(email: email).map {|s| ids << s.person_id if s.person_id.present? }
+    Email.where(email: email).map {|email| ids << email.person_id if email.person_id.present? }
+    Social.where(email: email).map {|social| ids << social.person_id if social.person_id.present? }
     ids.uniq
   end
 
