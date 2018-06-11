@@ -187,6 +187,7 @@ GEM
       rspec-support (~> 3.7.0)
     rspec-support (3.7.1)
     ruby_dep (1.5.0)
+    rubyzip (1.2.1)
     rufus-scheduler (3.5.0)
       fugit (~> 1.1, >= 1.1.1)
     safe_yaml (1.0.4)
@@ -254,6 +255,7 @@ DEPENDENCIES
   redis-rails
   rspec
   rspec-rails (~> 3.7)
+  rubyzip
   sdoc
   sidekiq
   sidekiq-scheduler
@@ -268,4 +270,4 @@ RUBY VERSION
    ruby 2.5.1p57
 
 BUNDLED WITH
-   1.16.1
+   1.16.2

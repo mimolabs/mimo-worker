@@ -16,10 +16,10 @@ class Email < ApplicationRecord
     end
 
     send_double_opt_in = e.new_record? ? true : false
-    e.save 
+    e.save
 
     return unless send_double_opt_in
-    e.send_double_opt_in_email 
+    e.send_double_opt_in_email
   end
 
   def send_double_opt_in_email
@@ -81,5 +81,17 @@ class Email < ApplicationRecord
 
   def location
     @email_location ||= Location.find_by id: location_id
+  end
+
+  def self.csv_file_name(person_id)
+    "emails_#{person_id}_#{SecureRandom.hex(5)}.csv"
+  end
+
+  def self.csv_headings
+    %w(ID Email Created_At Person_ID List_ID List_Type Added Active Blocked Bounced Spam Unsubscribed Consented Lists)
+  end
+
+  def csv_data
+    [id, email, created_at, person_id, list_id, list_type, added, active, blocked, bounced, spam, unsubscribed, consented, lists]
   end
 end

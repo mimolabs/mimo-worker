@@ -18,6 +18,7 @@ gem 'createsend'
 gem 'sdoc'
 gem 'redis-rails'
 gem 'faker'
+gem 'rubyzip'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console

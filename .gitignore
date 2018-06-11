@@ -28,5 +28,8 @@
 # private params
 /config/mimo-config.yml
 
+/config/initializers/_test_vars.rb
+/config/initializers/dev_vars.rb
+
 doc
 doc/*
