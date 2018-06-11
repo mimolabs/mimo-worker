@@ -4,8 +4,6 @@ RSpec.describe Person, type: :model do
 
   let(:mac) { (1..6).map{"%0.2X"%rand(256)}.join('-') }
   let(:ap_mac) { (1..6).map{"%0.2X"%rand(256)}.join('-') }
-  let(:mailer) { double('mailer') }
-  let(:email_obj) { double('email_obj') }
 
   describe 'create demo data in' do
 
@@ -159,5 +157,9 @@ RSpec.describe Person, type: :model do
       expect(Person.instance_variable_get(:@mailer_data)[0][:id]).to eq person.id
       expect(Person.instance_variable_get(:@mailer_opts)[:email]).to eq person.email
     end
+  end
+
+  describe '#download_request' do
+    # it ''
   end
 end
