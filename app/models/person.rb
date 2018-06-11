@@ -73,6 +73,10 @@ class Person < ApplicationRecord
     ids.uniq
   end
 
+  ##
+  # Creates a zip for with a user's Person data, and all of their associated
+  # Email, Social and Sms data, and emails the zip as an attached report.
+
   def self.download_person_data(opts)
     person = Person.find_by(id: opts['person_id'])
     return unless person
