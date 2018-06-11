@@ -128,15 +128,15 @@ RSpec.describe Person, type: :model do
   describe '#create_portal_links_email' do
     it 'creates a body of ids + codes and saves them all to redis' do
       ids = [123, 456, 789]
-      Person.create_access_codes(ids)
-      expect(Person.instance_variable_get(:@mailer_data).size).to eq 3
-      expect(Person.instance_variable_get(:@mailer_data)[0][:id]).to eq 123
-      expect(Person.instance_variable_get(:@mailer_data)[1][:id]).to eq 456
-      expect(Person.instance_variable_get(:@mailer_data)[2][:id]).to eq 789
+      codes = Person.create_access_codes(ids)
 
-      expect(REDIS.get("timelinePortalCode:#{123}")).not_to eq nil
-      expect(REDIS.get("timelinePortalCode:#{456}")).not_to eq nil
-      expect(REDIS.get("timelinePortalCode:#{789}")).not_to eq nil
+      expect(codes.size).to eq ids.size
+      expect(codes[0][:id]).to eq ids[0]
+      expect(REDIS.get("timelinePortalCode:#{ids[0]}")).not_to eq nil
+      expect(codes[1][:id]).to eq ids[1]
+      expect(REDIS.get("timelinePortalCode:#{ids[1]}")).not_to eq nil
+      expect(codes[2][:id]).to eq ids[2]
+      expect(REDIS.get("timelinePortalCode:#{ids[2]}")).not_to eq nil
     end
 
     it 'finds all people associated with an email address' do
@@ -154,17 +154,24 @@ RSpec.describe Person, type: :model do
     it 'should send off all the right data if there\'s a person associated' do
       person = Person.create email: Faker::Internet.email
       expect {Person.create_portal_links_email(person.email)}.to change { ActionMailer::Base.deliveries.count }.by(1)
-      expect(Person.instance_variable_get(:@mailer_data).size).to eq 1
-      expect(Person.instance_variable_get(:@mailer_data)[0][:id]).to eq person.id
       expect(Person.instance_variable_get(:@mailer_opts)[:email]).to eq person.email
+      expect(Person.instance_variable_get(:@mailer_opts)[:metadata][0][:id]).to eq person.id
+    end
+
+    it 'returns a timeline code + saves to redis' do
+      short_week = 5
+      id = 123
+      data = Person.set_timeline_portal_code(short_week, id)
+      expect(data[:id]).to eq id
+      expect(data[:code]).to be_present
+      expect(REDIS.get("timelinePortalCode:#{id}")).to eq data[:code]
     end
   end
 
   describe '#download_request' do
     it 'creates the zip for an email + sends, but deletes the zip' do
       person = Person.create email: Faker::Internet.email
-      Person.download_person_data({'person_id' => person.id, 'email' => person.email})
-      expect {Person.create_portal_links_email(person.email)}.to change { ActionMailer::Base.deliveries.count }.by(1)
+      expect {Person.download_person_data({'person_id' => person.id, 'email' => person.email})}.to change { ActionMailer::Base.deliveries.count }.by(1)
       expect(File.exist?("/tmp/person_#{person.id}.zip")).to eq false
     end
 

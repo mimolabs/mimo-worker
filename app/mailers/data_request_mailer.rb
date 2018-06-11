@@ -9,7 +9,7 @@ class DataRequestMailer < ApplicationMailer
 
   def access_request_email
     @email  = params[:email]
-    @mailer_data = params[:mailer_data]
+    @metadata = params[:metadata]
     @url = params[:url]
     mail(to: @email, subject: '[USER DATA] Your data request')
   end

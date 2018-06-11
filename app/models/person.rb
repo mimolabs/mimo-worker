@@ -42,11 +42,11 @@ class Person < ApplicationRecord
   # page(s) is emailed to them.
 
   def self.create_portal_links_email(email)
-    mailer_data = create_access_codes(get_people_ids(email))
-    return unless mailer_data
+    metadata = create_access_codes(get_people_ids(email))
+    return unless metadata
     @mailer_opts = {
       email: email,
-      mailer_data: mailer_data,
+      metadata: metadata,
       url: "https://#{ENV['MIMO_DASHBOARD_URL']}/#/timeline/"
     }
     DataRequestMailer.with(@mailer_opts).access_request_email.deliver_now
@@ -60,7 +60,6 @@ class Person < ApplicationRecord
   end
 
   def self.set_timeline_portal_code(week, id)
-    # write a new test for this
     code = SecureRandom.hex
     REDIS.setex("timelinePortalCode:#{id}", week, code)
     {id: id, code: code}
@@ -76,7 +75,8 @@ class Person < ApplicationRecord
 
   ##
   # Creates a zip for with a user's Person data, and all of their associated
-  # Email, Social and Sms data, and emails the zip as an attached report.
+  # Email, Social and Sms data. It emails the zip as an attached report to
+  # the requester.
 
   def self.download_person_data(opts)
     person = Person.find_by(id: opts['person_id'])
@@ -91,23 +91,33 @@ class Person < ApplicationRecord
   end
 
   def self.person_csv(person)
-    file_name = "person_#{person.id}_#{SecureRandom.hex(5)}.csv"
+    file_name = person.csv_file_name
     CSV.open("/tmp/#{file_name}", 'wb') do |csv|
-      csv << %w(ID Created Last_Seen Login_Count Client_Mac Username Email First_Name Last_Name Facebook Google Twitter)
-      csv << [person.id, person.created_at, person.last_seen, person.login_count, person.client_mac, person.username, person.email, person.first_name, person.last_name, person.facebook, person.google, person.twitter]
+      csv << csv_headings
+      csv << person.csv_data
     end
     file_name
+  end
+
+  def csv_file_name
+    "person_#{id}_#{SecureRandom.hex(5)}.csv"
+  end
+
+  def self.csv_headings
+    %w(ID Created Last_Seen Login_Count Client_Mac Username Email First_Name Last_Name Facebook Google Twitter)
+  end
+
+  def csv_data
+    [id, created_at, last_seen, login_count, client_mac, username, email, first_name, last_name, facebook, google, twitter]
   end
 
   def self.emails_csv(opts)
     emails = Email.where(person_id: opts['person_id'])
     return unless emails.present?
-    file_name = "emails_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
+    file_name = Email.csv_file_name(opts['person_id'])
     CSV.open("/tmp/#{file_name}", 'wb') do |csv|
-      csv << %w(ID Email Created_At Person_ID List_ID List_Type Added Active Blocked Bounced Spam Unsubscribed Consented Lists)
-      emails.each do |email|
-        csv << [email.id, email.email, email.created_at, email.person_id, email.list_id, email.list_type, email.added, email.active, email.blocked, email.bounced, email.spam, email.unsubscribed, email.consented, email.lists]
-      end
+      csv << Email.csv_headings
+      emails.map {|email| csv << email.csv_data}
     end
     file_name
   end
@@ -115,25 +125,21 @@ class Person < ApplicationRecord
   def self.social_csv(opts)
     social = Social.where(person_id: opts['person_id'])
     return unless social.present?
-    file_name = "social_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
+    file_name = Social.csv_file_name(opts['person_id'])
     CSV.open("/tmp/#{file_name}", 'wb') do |csv|
-      csv << %w(ID First_Name Last_Name Created_At Updated_At Facebook_ID Google_ID Email Gender Twitter_ID Person_ID Emails Meta)
-      social.each do |soc|
-        csv << [soc.id, soc.first_name, soc.last_name, soc.created_at, soc.updated_at, soc.facebook_id, soc.google_id, soc.email, soc.gender, soc.twitter_id, soc.person_id, soc.emails, soc.meta]
-      end
+      csv << Social.csv_headings
+      social.map {|soc| csv << soc.csv_data}
     end
     file_name
   end
 
   def self.sms_csv(opts)
-    sms = Sms.where(person_id: opts['person_id'])
-    return unless sms.present?
-    file_name = "sms_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
+    smss = Sms.where(person_id: opts['person_id'])
+    return unless smss.present?
+    file_name = Sms.csv_file_name(opts['person_id'])
     CSV.open("/tmp/#{file_name}", 'wb') do |csv|
-      csv << %w(ID Created_At Number Person_ID)
-      sms.each do |object|
-        csv << [object.id, object.created_at, object.number, object.person_id]
-      end
+      csv << Sms.csv_headings
+      smss.map {|sms| csv << sms.csv_data }
     end
     file_name
   end

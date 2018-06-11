@@ -58,9 +58,9 @@ class Social < ApplicationRecord
   #
   # Returns an object which is used to create / update the social record
   #
-  # Requires the twitter env vars to be set. Needs the :screen_name parameter in the opts 
+  # Requires the twitter env vars to be set. Needs the :screen_name parameter in the opts
   # in order to fetch the profile
-  
+
   def self.fetch_twitter(opts)
     details = Twitter.fetch(opts)
     return unless details.present?
@@ -78,7 +78,7 @@ class Social < ApplicationRecord
   #
   # Returns an object which is used to create / update the social record
   #
-  
+
   def self.fetch_google(opts)
     opts = {
       token: auth[:token],
@@ -98,7 +98,7 @@ class Social < ApplicationRecord
   def self.create_social(body)
     opts = {}
     opts[:location_id] = body['location_id']
-    
+
     if body['type'] == 'facebook'
       opts[:facebook_id] = body['id']
     end
@@ -132,7 +132,7 @@ class Social < ApplicationRecord
       social.meta['twitter'] = body
     end
 
-    social.clean_station_and_people(body) 
+    social.clean_station_and_people(body)
     social.person_id = body['person_id']
 
     ### Increment the checkins
@@ -141,8 +141,8 @@ class Social < ApplicationRecord
     social.save
   end
 
-  ## 
-  # Cleans up old stations and persons. 
+  ##
+  # Cleans up old stations and persons.
   #
   # A user checks in via FB on one device. A station and person are created.
   # Later they checkin with a different device, same FB account.
@@ -153,6 +153,18 @@ class Social < ApplicationRecord
     s = Station.find_by(person_id: body['person_id'])
     s.update_columns person_id: person_id if s.present?
     Person.find_by(id: body['person_id']).destroy
+  end
+
+  def self.csv_file_name(person_id)
+    "social_#{person_id}_#{SecureRandom.hex(5)}.csv"
+  end
+
+  def self.csv_headings
+    %w(ID First_Name Last_Name Created_At Updated_At Facebook_ID Google_ID Email Gender Twitter_ID Person_ID Emails Meta)
+  end
+
+  def csv_data
+    [id, first_name, last_name, created_at, updated_at, facebook_id, google_id, email, gender, twitter_id, person_id, emails, meta]
   end
 
   private
@@ -181,5 +193,4 @@ class Social < ApplicationRecord
     person.twitter  = true if twitter_id
     person.save
   end
-
 end

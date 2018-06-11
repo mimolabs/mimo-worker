@@ -6,7 +6,7 @@
   <body>
     <p>Please find the data we have associated with your email address at the following link(s):</p>
     <ul>
-      <% @mailer_data.each do |link| %>
+      <% @metadata.each do |link| %>
         <li><%= @url %><%= link[:id] %>?code=<%= link[:code] %></li>
       <% end %>
     </ul>
