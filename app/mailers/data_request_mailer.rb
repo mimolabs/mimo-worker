@@ -13,4 +13,10 @@ class DataRequestMailer < ApplicationMailer
     @url = params[:url]
     mail(to: @email, subject: '[USER DATA] Your data request')
   end
+
+  def data_download
+    @email = params[:email]
+    attachments[params[:zip]] = File.read("/tmp/#{params[:zip]}")
+    mail(to: @email, subject: '[USER DATA] Your data report')
+  end
 end

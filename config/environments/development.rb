@@ -66,7 +66,7 @@ Rails.application.configure do
   config.action_mailer.smtp_settings = {
     address:                ENV['MIMO_SMTP_HOST'],
     port:                   ENV['MIMO_SMTP_PORT'],
-    domain:                 ENV['MIMO_SMTP_DOMAIN'],
+    domain:                 ENV['MIMO_SMTP_DOMAIN'] || 'example.com',
     user_name:              ENV['MIMO_SMTP_USER'],
     password:               ENV['MIMO_SMTP_PASS'],
     authentication:         ENV['MIMO_SMTP_AUTH'] || 'plain',

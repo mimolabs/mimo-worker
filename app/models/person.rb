@@ -77,7 +77,11 @@ class Person < ApplicationRecord
     person = Person.find_by(id: opts['person_id'])
     return unless person
     csvs = [person_csv(person), emails_csv(opts), social_csv(opts), sms_csv(opts)].compact
-    create_zip(csvs, opts)
+    @mailer_opts = {
+      zip: create_zip(csvs, opts),
+      email: opts['email']
+    }
+    DataRequestMailer.with(@mailer_opts).data_download.deliver_now
     remove_files(csvs, opts)
   end
 
@@ -92,7 +96,7 @@ class Person < ApplicationRecord
 
   def self.emails_csv(opts)
     emails = Email.where(person_id: opts['person_id'])
-    return unless emails
+    return unless emails.present?
     file_name = "emails_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
     CSV.open("/tmp/#{file_name}", 'wb') do |csv|
       csv << %w(ID Email Created_At Person_ID List_ID List_Type Added Active Blocked Bounced Spam Unsubscribed Consented Lists)
@@ -105,7 +109,7 @@ class Person < ApplicationRecord
 
   def self.social_csv(opts)
     social = Social.where(person_id: opts['person_id'])
-    return unless social
+    return unless social.present?
     file_name = "social_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
     CSV.open("/tmp/#{file_name}", 'wb') do |csv|
       csv << %w(ID First_Name Last_Name Created_At Updated_At Facebook_ID Google_ID Email Gender Twitter_ID Person_ID Emails Meta)
@@ -118,7 +122,7 @@ class Person < ApplicationRecord
 
   def self.sms_csv(opts)
     sms = Sms.where(person_id: opts['person_id'])
-    return unless sms
+    return unless sms.present?
     file_name = "sms_#{opts['person_id']}_#{SecureRandom.hex(5)}.csv"
     CSV.open("/tmp/#{file_name}", 'wb') do |csv|
       csv << %w(ID Created_At Number Person_ID)
@@ -135,6 +139,7 @@ class Person < ApplicationRecord
         zip.add csv, "/tmp/#{csv}"
       end
     end
+    "person_#{opts['person_id']}.zip"
   end
 
   def self.remove_files(csvs, opts)

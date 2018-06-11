@@ -160,11 +160,12 @@ RSpec.describe Person, type: :model do
     end
   end
 
-  describe '#download_request', focus: true do
-    it 'creates the zip for an email' do
-      person = Person.create
+  describe '#download_request' do
+    it 'creates the zip for an email + sends, but deletes the zip' do
+      person = Person.create email: Faker::Internet.email
       Person.download_person_data({'person_id' => person.id, 'email' => person.email})
-      # check mail is sent?
+      expect {Person.create_portal_links_email(person.email)}.to change { ActionMailer::Base.deliveries.count }.by(1)
+      expect(File.exist?("/tmp/person_#{person.id}.zip")).to eq false
     end
 
     it 'creates a file for the person data' do
