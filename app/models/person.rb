@@ -71,6 +71,10 @@ class Person < ApplicationRecord
     ids.uniq
   end
 
+  def self.download_request(opts)
+    
+  end
+
   def self.create_demo_data
     create_new_demo_people
     update_existing_demo_data

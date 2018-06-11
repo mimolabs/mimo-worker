@@ -5,6 +5,6 @@ class DownloadPersonTimeline
 
   def perform(options={})
     return unless options['person_id'].present? && options['email'].present?
-    PersonTimeline.download(options)
+    Person.download_request(options)
   end
 end
