@@ -1,4 +1,5 @@
 require 'rails_helper'
+require 'zip'
 
 RSpec.describe Person, type: :model do
 
@@ -159,7 +160,62 @@ RSpec.describe Person, type: :model do
     end
   end
 
-  describe '#download_request' do
-    # it ''
+  describe '#download_request', focus: true do
+    it 'creates the zip for an email' do
+      person = Person.create
+      Person.download_person_data({'person_id' => person.id, 'email' => person.email})
+      # check mail is sent?
+    end
+
+    it 'creates a file for the person data' do
+      first = Faker::Name.first_name
+      last = Faker::Name.last_name
+      person = Person.create first_name: first, last_name: last,
+                             email: "#{first.downcase}_#{last.downcase}@email.com",
+                             location_id: 123
+      file_name = Person.person_csv(person)
+      expect(File.file?("/tmp/#{file_name}")).to eq true
+      csv = CSV.read("/tmp/#{file_name}", 'r')
+      expect(csv[0][0]).to eq 'ID'
+      expect(csv[1][0]).to eq person.id.to_s
+      expect(csv[0][6]).to eq 'Email'
+      expect(csv[1][6]).to eq person.email
+      expect(csv[0].size).to eq csv[1].size
+      File.delete("/tmp/#{file_name}") if File.exist?("/tmp/#{file_name}")
+    end
+
+    it 'creates a file for the email data' do
+      person = Person.create
+      email = Email.create email: Faker::Internet.email, person_id: person.id
+      second_email = Email.create email: Faker::Internet.email, person_id: person.id
+      file_name = Person.emails_csv('person_id' => person.id)
+      expect(File.file?("/tmp/#{file_name}")).to eq true
+      csv = CSV.read("/tmp/#{file_name}", 'r')
+      expect(csv[0][0]).to eq 'ID'
+      expect(csv[1][0]).to eq email.id.to_s
+      expect(csv[2][0]).to eq second_email.id.to_s
+      expect(csv[0][1]).to eq 'Email'
+      expect(csv[1][1]).to eq email.email
+      expect(csv[2][1]).to eq second_email.email
+      expect(csv[0].size).to eq csv[1].size
+      File.delete("/tmp/#{file_name}") if File.exist?("/tmp/#{file_name}")
+    end
+
+    it 'creates a file for the social data' do
+      person = Person.create
+      social = Social.create person_id: person.id, first_name: Faker::Name.first_name
+      second_social = Social.create person_id: person.id, first_name: Faker::Name.first_name
+      file_name = Person.social_csv('person_id' => person.id)
+      expect(File.file?("/tmp/#{file_name}")).to eq true
+      csv = CSV.read("/tmp/#{file_name}", 'r')
+      expect(csv[0][0]).to eq 'ID'
+      expect(csv[1][0]).to eq social.id.to_s
+      expect(csv[2][0]).to eq second_social.id.to_s
+      expect(csv[0][1]).to eq 'First_Name'
+      expect(csv[1][1]).to eq social.first_name
+      expect(csv[2][1]).to eq second_social.first_name
+      expect(csv[0].size).to eq csv[1].size
+      File.delete("/tmp/#{file_name}") if File.exist?("/tmp/#{file_name}")
+    end
   end
 end
