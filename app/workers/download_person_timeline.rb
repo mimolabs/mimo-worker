@@ -1,6 +1,5 @@
 class DownloadPersonTimeline
   include Sidekiq::Worker
-  include Sidekiq::Status::Worker
   sidekiq_options retry: true
 
   def perform(options={})
