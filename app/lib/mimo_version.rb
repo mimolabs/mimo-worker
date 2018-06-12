@@ -4,7 +4,7 @@ module MimoVersion
     settings = Settings.first
     return unless settings.present?
     url   = ENV['MIMO_UPGRADES_URL'] || "https://updates.ldn-01.oh-mimo.com/v1/updates"
-    conn = Faraday.new(:url => url + '/#{settings.unique_id}')
+    conn = Faraday.new(:url => url + '/' + settings.unique_id)
     response = conn.get
     case response.status
     when 200
