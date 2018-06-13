@@ -1,3 +1,10 @@
+GIT
+  remote: https://github.com/mimolabs/raven-ruby.git
+  revision: 120a416cf0df0a08803992a7c643741862f000ad
+  specs:
+    sentry-raven (2.7.3)
+      faraday (>= 0.7.6, < 1.0)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -257,6 +264,7 @@ DEPENDENCIES
   rspec-rails (~> 3.7)
   rubyzip
   sdoc
+  sentry-raven!
   sidekiq
   sidekiq-scheduler
   spring

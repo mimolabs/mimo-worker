@@ -19,6 +19,7 @@ gem 'sdoc'
 gem 'redis-rails'
 gem 'faker'
 gem 'rubyzip'
+gem "sentry-raven", git: 'https://github.com/mimolabs/raven-ruby.git'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
