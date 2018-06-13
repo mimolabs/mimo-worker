@@ -19,7 +19,7 @@ class Settings < ApplicationRecord
     opts[:social]   = Social.all.size
     opts[:station]  = Station.all.size
 
-    host = ENV['MIMO_ANON_STATS'] || 'https://anon-stats.ldn-01.oh-mimo.com/v1/stats'
+    host = ENV['MIMO_ANON_STATS'] || 'https://stats-sink.oh-mimo.com/v1/stats'
 
     conn = Faraday.new(
       url: host + '/' + settings.unique_id,

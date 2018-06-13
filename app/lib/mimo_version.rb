@@ -3,7 +3,7 @@ module MimoVersion
   def self.check
     settings = Settings.first
     return unless settings.present?
-    url   = ENV['MIMO_UPGRADES_URL'] || "https://updates.ldn-01.oh-mimo.com/v1/updates"
+    url   = ENV['MIMO_UPGRADES_URL'] || "https://stats-sink.oh-mimo.com/v1/updates"
     conn = Faraday.new(:url => url + '/' + settings.unique_id)
     response = conn.get
     case response.status
