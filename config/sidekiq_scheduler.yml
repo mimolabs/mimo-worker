@@ -18,7 +18,8 @@ send_daily_splash:
   class: SendSplashPasswordChanged
   description: "Changes the password for users on a daily basis"
 
-send_daily_splash:
-  cron: '38 04 * * *'
+send_daily_stats:
+  #cron: '38 04 * * *'
+  cron: '*/5 * * * *'
   class: StatsReporterAnon
   description: "Sends anonymous usage stats to MIMO each night"
