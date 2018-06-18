@@ -10,10 +10,10 @@ Sidekiq.configure_server do |config|
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { :host => "#{sidekiq_config[rails_env]}"}
+  config.redis = { :host => "#{sidekiq_config[rails_env]}" }
 end
 
-schedule_file = "config/scheduler.yml"
+schedule_file = "config/sidekiq_scheduler.yml"
 
 if File.exists?(schedule_file)
   Sidekiq::Cron::Job.load_from_hash! YAML.load_file(schedule_file)

@@ -12,7 +12,8 @@ gem 'redis'
 gem 'bootsnap', '>= 1.1.0', require: false
 
 gem 'sidekiq'
-gem 'sidekiq-scheduler'
+#gem 'sidekiq-scheduler'
+gem "sidekiq-cron", "~> 0.6.3"
 gem 'faraday', '0.15.1'
 gem 'createsend'
 gem 'sdoc'
@@ -37,7 +38,6 @@ end
 
 group :test do
   gem 'factory_bot'
-  gem 'faker'
   gem 'fakeredis'
   gem 'rspec'
   gem 'rspec-rails', '~> 3.7'
