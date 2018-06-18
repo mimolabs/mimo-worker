@@ -1,25 +1,26 @@
 wipe_old_event_logs:
   cron: '0 0 6 * * *'
-  class: WipeEventLogs
+  class: 'WipeEventLogs'
   description: 'This job removes old event logs'
 
 import_devices:
   cron: '0 */5 * ? * *'
-  class: ImportDevices
+  class: 'ImportDevices'
   description: 'This job imports all the devices from the controllers'
 
 generate_demo_data:
   cron: '0 0 4 * * *'
-  class: GenerateDemoData 
+  class: 'GenerateDemoData'
   description: 'This job generates demo data for the users'
 
 send_daily_splash:
   cron: '58 06 * * *'
-  class: SendSplashPasswordChanged
+  class: 'SendSplashPasswordChanged'
   description: "Changes the password for users on a daily basis"
 
 send_daily_stats:
-  #cron: '38 04 * * *'
-  cron: '*/5 * * * *'
-  class: StatsReporterAnon
+  cron: '38 04 * * *'
+  # cron: '*/1 * * * *'
+  class: 'StatsReporterAnon'
+  queue: default
   description: "Sends anonymous usage stats to MIMO each night"

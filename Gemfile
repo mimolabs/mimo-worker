@@ -13,7 +13,8 @@ gem 'bootsnap', '>= 1.1.0', require: false
 
 gem 'sidekiq'
 #gem 'sidekiq-scheduler'
-gem "sidekiq-cron", "~> 0.6.3"
+gem "sidekiq-cron"#, "~> 0.6.3"
+gem 'rufus-scheduler', '~> 3.4.0'
 gem 'faraday', '0.15.1'
 gem 'createsend'
 gem 'sdoc'
