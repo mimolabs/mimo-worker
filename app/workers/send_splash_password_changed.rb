@@ -6,6 +6,6 @@ class SendSplashPasswordChanged
   sidekiq_options :retry => false
 
   def perform(args={})
-    Splash.send_daily_passwords
+    SplashPage.send_daily_passwords
   end
 end
