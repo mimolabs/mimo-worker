@@ -12,12 +12,13 @@ class Settings < ApplicationRecord
 
     opts = {}
 
-    opts[:id]       = settings.unique_id
-    opts[:boxes]    = Box.all.size
-    opts[:people]   = Person.all.size
-    opts[:emails]   = Email.all.size
-    opts[:social]   = Social.all.size
-    opts[:station]  = Station.all.size
+    opts[:id]         = settings.unique_id
+    opts[:boxes]      = Box.all.size
+    opts[:people]     = Person.where.not(location_id: 10_000).size
+    opts[:emails]     = Email.where.not(location_id: 10_000).size
+    opts[:social]     = Social.where.not(location_id: 10_000).size
+    opts[:station]    = Station.where.not(location_id: 10_000).size
+    opts[:created_at] = settings.created_at.to_i
 
     host = ENV['MIMO_ANON_STATS'] || 'https://stats-sink.oh-mimo.com/v1/stats'
 
